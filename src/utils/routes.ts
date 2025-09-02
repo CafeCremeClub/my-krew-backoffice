@@ -7,7 +7,7 @@ import {
 export const routes = [
     {
         id: 1,
-        name: "Utilisateurs",
+        name: "Consultants",
         routeName: "/dashboard",
         icon: Users,
     },

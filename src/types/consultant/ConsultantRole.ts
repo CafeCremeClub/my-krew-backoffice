@@ -1,4 +1,6 @@
-export enum UserRole {
+
+
+export enum ConsultantRole {
     AMBASSADOR = "ambassador",
     INFLUENCER = "influencer",
     ELITE = "elite",

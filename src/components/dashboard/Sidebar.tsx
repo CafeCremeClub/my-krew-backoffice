@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {routes} from "@/utils/routes";
 import Image from "next/image";
-import {userImage} from "../../../public";
+import {defaultUserImage} from "../../../public";
 import {usePathname, useRouter} from "next/navigation";
+import useGetMe from "@/hooks/auth/useGetMe";
 
 const Sidebar = () => {
 
@@ -15,6 +16,11 @@ const Sidebar = () => {
         setSelectedRoute(routeName)
         router.push(routeName);
     }
+
+    const {
+        isPending,
+        data
+    } = useGetMe();
 
     useEffect(() => {
         const currentRoute = routes.find(route => route.routeName === pathname);
@@ -53,15 +59,22 @@ const Sidebar = () => {
                     onClick={() => router.push("/dashboard/profile")}
                 >
                     <Image
-                        src={userImage}
+                        src={defaultUserImage}
                         alt="user image"
                         width={40}
                         height={40}
                         className="rounded-full object-cover object-center"
                     />
-                    <p className="text-sm font-medium">
-                        Hello, Arthur
-                    </p>
+                    {
+                        isPending ?
+                            <div
+                                className="h-8 rounded w-28 bg-gray-200 animate-pulse"
+                            /> :
+                            data && data.firstname && data.lastname ?
+                                <p className="text-sm font-medium leading-6">
+                                    Hello, <b className="font-semibold">{data.firstname} {data.lastname}</b>
+                                </p> : null
+                    }
                 </div>
             </div>
         </div>

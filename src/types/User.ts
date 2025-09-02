@@ -1,21 +1,13 @@
-import {UserRole} from "@/types/UserRole";
+import {UserAuthRole} from "@/types/UserAuthRole";
 
 export interface User {
     id: string;
-    firstname: string | null;
-    lastname: string | null;
+    firstname: string;
+    lastname: string;
     email: string;
-    phone: string;
-    status: string;
-    type: "entrepreneur" | "admin";
-    startDate: string;
-    endDate: string;
-    officeId: string;
-    portageId: string;
-    role: UserRole;
-    referrals: number;
-    monthlyEstimation: number | null,
-    performance: number | null
-    createdAt: string;
-    updatedAt: string;
+    phone: string | null;
+    role: UserAuthRole;
+    authMode: string;
+    signInAt: string;
+    deletedAt: string | null;
 }
