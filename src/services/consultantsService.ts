@@ -1,6 +1,7 @@
 import {GetConsultantsResponse} from "@/types/consultant/GetConsultantsResponse";
 import {GetConsultantsParams} from "@/types/consultant/GetConsultantsParams";
 import axiosInstance from "@/config/axiosInstance";
+import {CreateConsultantPayload} from "@/types/consultant/CreateConsultantPayload";
 
 export const getConsultants = async (params?: GetConsultantsParams): Promise<GetConsultantsResponse> => {
     try {
@@ -21,6 +22,15 @@ export const getConsultants = async (params?: GetConsultantsParams): Promise<Get
         const url = `/consultants/admin${queryString ? `?${queryString}` : ''}`
         const response = await axiosInstance.get<GetConsultantsResponse>(url);
         return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+
+export const createConsultant = async (payload: CreateConsultantPayload): Promise<void> => {
+    try {
+        await axiosInstance.post<void>("/users/register", payload)
     } catch (error) {
         throw error;
     }

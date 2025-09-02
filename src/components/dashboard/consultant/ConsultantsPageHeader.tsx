@@ -2,13 +2,18 @@ import React, {useState} from 'react';
 import CustomButton from "@/components/custom/CustomButton";
 import AddNewConsultantDialog from "@/components/dashboard/consultant/AddNewConsultantDialog";
 
-const ConsultantsPageHeader = () => {
+interface ConsultantsPageHeaderProps {
+    page?: number;
+}
+
+const ConsultantsPageHeader = ({page = 1}: ConsultantsPageHeaderProps) => {
 
     const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState<boolean>(false);
 
     return (
         <>
             <AddNewConsultantDialog
+                page={page}
                 isOpen={isAddUserDialogOpen}
                 onClose={() => setIsAddUserDialogOpen(false)}
             />

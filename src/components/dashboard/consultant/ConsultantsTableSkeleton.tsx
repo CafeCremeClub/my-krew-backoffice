@@ -1,9 +1,10 @@
 import React from 'react';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {Skeleton} from "@/components/ui/skeleton";
 
 const ConsultantsTableSkeleton = () => {
     // Create skeleton rows - typically 5-10 rows for a good skeleton effect
-    const skeletonRows = Array.from({ length: 8 }, (_, index) => index);
+    const skeletonRows = Array.from({length: 8}, (_, index) => index);
 
     return (
         <div className="overflow-hidden">
@@ -28,60 +29,60 @@ const ConsultantsTableSkeleton = () => {
                             <TableRow key={index} className="h-16">
                                 {/* Nom complet */}
                                 <TableCell>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                                    <Skeleton className="h-4 w-32"/>
                                 </TableCell>
                                 {/* Email */}
                                 <TableCell>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-40"></div>
+                                    <Skeleton className="h-4 w-40"/>
                                 </TableCell>
                                 {/* Statut */}
                                 <TableCell>
-                                    <div className="h-6 bg-gray-200 rounded-full animate-pulse w-16"></div>
+                                    <Skeleton className="h-6 w-16 rounded-full"/>
                                 </TableCell>
                                 {/* Date de début */}
                                 <TableCell>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                                    <Skeleton className="h-4 w-20"/>
                                 </TableCell>
                                 {/* Date de fin */}
                                 <TableCell>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                                    <Skeleton className="h-4 w-20"/>
                                 </TableCell>
                                 {/* Bureau */}
                                 <TableCell>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                                    <Skeleton className="h-4 w-24"/>
                                 </TableCell>
                                 {/* Société de portage */}
                                 <TableCell>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-36"></div>
+                                    <Skeleton className="h-4 w-36"/>
                                 </TableCell>
                                 {/* Rôle */}
                                 <TableCell>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                                    <Skeleton className="h-4 w-20"/>
                                 </TableCell>
                                 {/* Estimation mensuelle */}
                                 <TableCell>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+                                    <Skeleton className="h-4 w-16"/>
                                 </TableCell>
                                 {/* Performance */}
                                 <TableCell>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-8"></div>
+                                    <Skeleton className="h-4 w-8"/>
                                 </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
             </div>
-            
+
             {/* Pagination skeleton */}
             <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center gap-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                    <Skeleton className="h-4 w-32"/>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="h-8 bg-gray-200 rounded animate-pulse w-8"></div>
-                    <div className="h-8 bg-gray-200 rounded animate-pulse w-8"></div>
-                    <div className="h-8 bg-gray-200 rounded animate-pulse w-8"></div>
-                    <div className="h-8 bg-gray-200 rounded animate-pulse w-8"></div>
+                    <Skeleton className="h-8 w-8"/>
+                    <Skeleton className="h-8 w-8"/>
+                    <Skeleton className="h-8 w-8"/>
+                    <Skeleton className="h-8 w-8"/>
                 </div>
             </div>
         </div>

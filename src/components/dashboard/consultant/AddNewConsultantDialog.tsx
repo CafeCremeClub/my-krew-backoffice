@@ -8,15 +8,24 @@ import {
     DialogTitle
 } from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
+import {Skeleton} from "@/components/ui/skeleton";
 import CustomButton from "@/components/custom/CustomButton";
 import CustomInput from "@/components/custom/CustomInput";
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import CustomErrorIndicator from "@/components/custom/CustomErrorIndicator";
+import CustomSelect from "@/components/custom/CustomSelect";
+import useGetPortages from "@/hooks/portage/useGetPortages";
+import useGetOffices from "@/hooks/office/useGetOffices";
+import useCreateConsultant from "@/hooks/consultant/useCreateConsultant";
+import {toast} from "sonner";
+import {useQueryClient} from "@tanstack/react-query";
+import {GET_CONSULTANTS_DEFAULT_PER_PAGE} from "@/hooks/consultant/useGetConsultants";
 
 interface AddNewUserDialogProps {
     isOpen: boolean;
     onClose: () => void;
+    page?: number; // Optional, if you want to handle pagination
 }
 
 // Validation schema using Yup
@@ -43,13 +52,34 @@ const validationSchema = Yup.object({
         .required('Date de début requise'),
     endDate: Yup.date()
         .min(Yup.ref('startDate'), 'La date de fin doit être postérieure à la date de début')
-        .required('Date de fin requise')
+        .required('Date de fin requise'),
+    portageId: Yup.string()
+        .required('Société de portage requise'),
+    officeId: Yup.string()
+        .required('Bureau requis')
 });
 
 const AddNewConsultantDialog = ({
                                     isOpen,
-                                    onClose
+                                    onClose,
+                                    page = 1
                                 }: AddNewUserDialogProps) => {
+
+    const queryClient = useQueryClient();
+    const {
+        isPending,
+        mutateAsync
+    } = useCreateConsultant()
+
+    const {
+        isPending: isPortagesPending,
+        data: portagesData
+    } = useGetPortages();
+
+    const {
+        isPending: isOfficesPending,
+        data: officesData
+    } = useGetOffices();
 
     const formik = useFormik({
         initialValues: {
@@ -60,15 +90,64 @@ const AddNewConsultantDialog = ({
             status: 'active' as 'active' | 'inactive',
             type: '',
             startDate: '',
-            endDate: ''
+            endDate: '',
+            portageId: '',
+            officeId: ''
         },
         validationSchema,
-        onSubmit: (values) => {
-            console.log('Form data:', values);
-            // Handle form submission here
-            onClose();
+        onSubmit: async (values) => {
+            try {
+                await mutateAsync({
+                    firstname: values.firstName,
+                    lastname: values.lastName,
+                    email: values.email,
+                    phone: values.phone,
+                    status: values.status,
+                    type: values.type,
+                    startDate: values.startDate,
+                    endDate: values.endDate,
+                    portageId: values.portageId,
+                    officeId: values.officeId
+                })
+
+                await queryClient.invalidateQueries({
+                    queryKey: ["get-consultants", page, GET_CONSULTANTS_DEFAULT_PER_PAGE],
+                    type: 'all',
+                    exact: true,
+                })
+
+                toast.success("Consultant créé", {
+                    description: "Le consultant a été créé avec succès.",
+                    position: "bottom-right",
+                    className: "!bg-[#CBF5E5] !text-[#176448] !border !border-[#CBF5E5]",
+                    descriptionClassName: "!text-[#176448] !text-sm"
+                });
+
+                onClose();
+
+            } catch (error) {
+                console.log(error)
+                toast.error("Échec de la création du consultant", {
+                    description: "Une erreur est survenue lors de la création du consultant.",
+                    position: "bottom-right",
+                    className: "!bg-[#DF1C41] !text-white",
+                    descriptionClassName: "!text-white !text-xs"
+                });
+            }
         }
     });
+
+    // Transform portages data for CustomSelect
+    const portageOptions = portagesData?.map(portage => ({
+        label: portage.name,
+        value: portage.id
+    })) || [];
+
+    // Transform offices data for CustomSelect
+    const officeOptions = officesData?.map(office => ({
+        label: office.name,
+        value: office.id
+    })) || [];
 
     return (
         <Dialog
@@ -256,11 +335,62 @@ const AddNewConsultantDialog = ({
                                 />
                             )}
                         </div>
+
+                        {/* Portage Select */}
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="portageId">
+                                Société de portage
+                            </Label>
+                            {isPortagesPending ? (
+                                <Skeleton className="h-[2.5rem] w-full rounded-[0.625rem]"/>
+                            ) : (
+                                <CustomSelect
+                                    value={formik.values.portageId}
+                                    onChange={(value) => formik.setFieldValue('portageId', value)}
+                                    placeholder="Sélectionnez une société de portage"
+                                    options={portageOptions}
+                                    className="w-full"
+                                    isError={formik.touched.portageId && !!formik.errors.portageId}
+                                />
+                            )}
+                            {formik.touched.portageId && formik.errors.portageId && (
+                                <CustomErrorIndicator
+                                    message={formik.errors.portageId}
+                                />
+                            )}
+                        </div>
+
+                        {/* Office Select */}
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="officeId">
+                                Bureau
+                            </Label>
+                            {isOfficesPending ? (
+                                <Skeleton className="h-[2.5rem] w-full rounded-[0.625rem]"/>
+                            ) : (
+                                <CustomSelect
+                                    value={formik.values.officeId}
+                                    onChange={(value) => formik.setFieldValue('officeId', value)}
+                                    placeholder="Sélectionnez un bureau"
+                                    options={officeOptions}
+                                    className="w-full"
+                                    isError={formik.touched.officeId && !!formik.errors.officeId}
+                                />
+                            )}
+                            {formik.touched.officeId && formik.errors.officeId && (
+                                <CustomErrorIndicator
+                                    message={formik.errors.officeId}
+                                />
+                            )}
+                        </div>
+
                     </form>
                     <DialogFooter className="sm:justify-start">
                         <CustomButton
                             className="w-full"
                             type="submit"
+                            disabled={isPending}
+                            isLoading={isPending}
                             onClick={() => formik.handleSubmit()}
                         >
                             Enregistrer
@@ -273,3 +403,4 @@ const AddNewConsultantDialog = ({
 };
 
 export default AddNewConsultantDialog;
+

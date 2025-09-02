@@ -7,9 +7,16 @@ import {ConsultantStatus} from "@/types/consultant/ConsultantStatus";
 import {formatDateToFR} from "@/utils/helpers/formatDateToFR";
 import ConsultantsTablePaginationControls from "@/components/dashboard/consultant/ConsultantsTablePaginationControls";
 
-const ConsultantsTable = () => {
+interface ConsultantsTableProps {
+    page?: number;
+    setPage?: (page: number) => void;
+}
 
-    const [page, setPage] = useState<number>(1);
+const ConsultantsTable = ({
+                              page = 1,
+                              setPage = () => {
+                              }
+                          }: ConsultantsTableProps) => {
 
     const {
         isPending,
