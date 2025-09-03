@@ -19,10 +19,13 @@ import {toast} from "sonner";
 import {useQueryClient} from "@tanstack/react-query";
 import {TransactionType} from "@/types/transaction/TransactionType";
 import {TransactionStatus} from "@/types/transaction/TransactionStatus";
+import {Consultant} from "@/types/consultant/Consultant";
+import {GET_TRANSACTIONS_DEFAULT_PER_PAGE} from "@/hooks/transaction/useGetTransactions";
 
 interface AddNewTransactionDialogProps {
     isOpen: boolean;
     onClose: () => void;
+    consultant: Consultant;
     page?: number;
 }
 
@@ -47,7 +50,8 @@ const validationSchema = Yup.object({
 const AddNewTransactionDialog = ({
                                      isOpen,
                                      onClose,
-                                     page = 1
+                                     consultant,
+                                     page
                                  }: AddNewTransactionDialogProps) => {
 
     const queryClient = useQueryClient();
@@ -69,7 +73,7 @@ const AddNewTransactionDialog = ({
         onSubmit: async (values, {resetForm}) => {
             try {
                 await mutateAsync({
-                    consultantId: 'temp-consultant-id', // TODO: This should be selected from a consultant dropdown or passed as prop
+                    consultantId: consultant.id,
                     gross: parseFloat(values.gross),
                     net: parseFloat(values.net),
                     type: values.type,
@@ -78,8 +82,9 @@ const AddNewTransactionDialog = ({
                 });
 
                 await queryClient.invalidateQueries({
-                    queryKey: ['get-transactions', page],
-                    type: 'all'
+                    queryKey: ['get-transactions', page ?? 1, GET_TRANSACTIONS_DEFAULT_PER_PAGE],
+                    type: "all",
+                    exact: true
                 });
 
                 toast.success("Transaction créée", {
@@ -127,7 +132,9 @@ const AddNewTransactionDialog = ({
                 className="sm:max-w-xl p-1 rounded-[1.25rem] px-2 max-h-[95vh] overflow-y-auto hidden-scrollbar">
                 <div className="bg-white rounded-2xl overflow-hidden flex flex-col gap-10 py-6 px-2">
                     <DialogHeader>
-                        <DialogTitle>Ajouter une nouvelle transaction</DialogTitle>
+                        <DialogTitle>
+                            Ajouter une nouvelle transaction au consultant {consultant.firstname} {consultant.lastname}
+                        </DialogTitle>
                         <DialogDescription>
                             Remplissez les informations pour créer une nouvelle transaction.
                         </DialogDescription>

@@ -10,6 +10,8 @@ import CustomButton from "@/components/custom/CustomButton";
 import {Consultant} from "@/types/consultant/Consultant";
 import UpdateConsultantRoleDialog from "@/components/dashboard/consultant/UpdateConsultantRoleDialog";
 import DeleteConsultantAlertDialog from "@/components/dashboard/consultant/DeleteConsultantAlertDialog";
+import {Pen, Plus, Trash} from "lucide-react";
+import AddNewTransactionDialog from "@/components/dashboard/transaction/AddNewTransactionDialog";
 
 interface ConsultantsTableProps {
     page?: number;
@@ -25,6 +27,7 @@ const ConsultantsTable = ({
     const [consultant, setConsultant] = useState<Consultant | null>(null);
     const [isUpdateRoleDialogOpen, setIsUpdateRoleDialogOpen] = useState<boolean>(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+    const [isAddTransactionDialogOpen, setIsAddTransactionDialogOpen] = useState<boolean>(false);
 
 
     const {
@@ -122,6 +125,11 @@ const ConsultantsTable = ({
         setIsDeleteDialogOpen(true);
     }
 
+    const handleAddTransactionClick = (consultant: Consultant) => {
+        setConsultant(consultant);
+        setIsAddTransactionDialogOpen(true);
+    }
+
     return (
         <>
 
@@ -145,6 +153,20 @@ const ConsultantsTable = ({
                         open={isDeleteDialogOpen}
                         onClose={() => {
                             setIsDeleteDialogOpen(false)
+                            setConsultant(null)
+                        }}
+                        consultant={consultant}
+                        page={page}
+                    />
+                ) : null
+            }
+
+            {
+                consultant && isAddTransactionDialogOpen ? (
+                    <AddNewTransactionDialog
+                        isOpen={isAddTransactionDialogOpen}
+                        onClose={() => {
+                            setIsAddTransactionDialogOpen(false)
                             setConsultant(null)
                         }}
                         consultant={consultant}
@@ -227,13 +249,21 @@ const ConsultantsTable = ({
                                                 <TableCell className="text-sm text-[#475467]">
                                                     <div className="flex gap-2">
                                                         <CustomButton
+                                                            onClick={() => handleAddTransactionClick(consultant)}
+                                                            icon={<Plus className="flex-none size-5"/>}
+                                                        >
+                                                            Ajouter une transaction
+                                                        </CustomButton>
+                                                        <CustomButton
                                                             onClick={() => handleUpdateRoleClick(consultant)}
+                                                            icon={<Pen className="flex-none size-4"/>}
                                                         >
                                                             Modifier le role
                                                         </CustomButton>
                                                         <CustomButton
                                                             className="bg-red-600 hover:bg-red-700 text-white"
                                                             onClick={() => handleDeleteClick(consultant)}
+                                                            icon={<Trash className="flex-none size-4"/>}
                                                         >
                                                             Supprimer
                                                         </CustomButton>
