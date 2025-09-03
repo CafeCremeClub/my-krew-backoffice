@@ -1,5 +1,6 @@
 import {ConsultantRole} from "@/types/consultant/ConsultantRole";
 import {ConsultantStatus} from "@/types/consultant/ConsultantStatus";
+import {ConsultantType} from "@/types/consultant/ConsultantType";
 
 export interface Consultant {
     id: string;
@@ -8,7 +9,7 @@ export interface Consultant {
     email: string;
     phone: string | null;
     status: ConsultantStatus;
-    type: string;
+    type: ConsultantType;
     startDate: string;
     endDate: string;
     office: string;

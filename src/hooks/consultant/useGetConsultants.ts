@@ -13,7 +13,11 @@ const useGetConsultants = (params?: GetConsultantsParams) => {
     }
 
     return useQuery({
-        queryKey: ["get-consultants", mergedParams.page, mergedParams.perPage],
+        queryKey: [
+            "get-consultants",
+            mergedParams.page,
+            mergedParams.perPage
+        ],
         queryFn: async () => await getConsultants(mergedParams),
         retry: 0,
         refetchOnMount: false,

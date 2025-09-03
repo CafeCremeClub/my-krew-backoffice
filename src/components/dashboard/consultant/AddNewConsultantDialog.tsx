@@ -19,8 +19,9 @@ import useGetPortages from "@/hooks/portage/useGetPortages";
 import useGetOffices from "@/hooks/office/useGetOffices";
 import useCreateConsultant from "@/hooks/consultant/useCreateConsultant";
 import {toast} from "sonner";
-import {useQueryClient} from "@tanstack/react-query";
-import {GET_CONSULTANTS_DEFAULT_PER_PAGE} from "@/hooks/consultant/useGetConsultants";
+import {ConsultantType} from "@/types/consultant/ConsultantType";
+import {handleCreateConsultantError} from "@/utils/helpers/handleCreateConsultantError";
+import useGetConsultants from "@/hooks/consultant/useGetConsultants";
 
 interface AddNewUserDialogProps {
     isOpen: boolean;
@@ -61,11 +62,9 @@ const validationSchema = Yup.object({
 
 const AddNewConsultantDialog = ({
                                     isOpen,
-                                    onClose,
-                                    page
+                                    onClose
                                 }: AddNewUserDialogProps) => {
 
-    const queryClient = useQueryClient();
     const {
         isPending,
         mutateAsync
@@ -80,6 +79,10 @@ const AddNewConsultantDialog = ({
         isPending: isOfficesPending,
         data: officesData
     } = useGetOffices();
+
+    const {
+        refetch
+    } = useGetConsultants();
 
     const formik = useFormik({
         initialValues: {
@@ -110,11 +113,7 @@ const AddNewConsultantDialog = ({
                     officeId: values.officeId
                 })
 
-                await queryClient.invalidateQueries({
-                    queryKey: ["get-consultants", page, GET_CONSULTANTS_DEFAULT_PER_PAGE],
-                    type: 'all',
-                    exact: true,
-                })
+                await refetch();
 
                 toast.success("Consultant créé", {
                     description: "Le consultant a été créé avec succès.",
@@ -128,9 +127,9 @@ const AddNewConsultantDialog = ({
                 onClose();
 
             } catch (error) {
-                console.log(error)
+                const errorMessage = handleCreateConsultantError(error);
                 toast.error("Échec de la création du consultant", {
-                    description: "Une erreur est survenue lors de la création du consultant.",
+                    description: errorMessage,
                     position: "bottom-right",
                     className: "!bg-[#DF1C41] !text-white",
                     descriptionClassName: "!text-white !text-xs"
@@ -283,14 +282,21 @@ const AddNewConsultantDialog = ({
                         {/* Type */}
                         <div className="flex flex-col gap-1.5">
                             <Label htmlFor="type">Type</Label>
-                            <CustomInput
-                                id="type"
-                                name="type"
-                                type="text"
-                                placeholder="Entrez le type d'utilisateur"
+                            <CustomSelect
                                 value={formik.values.type}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
+                                onChange={(value) => formik.setFieldValue('type', value)}
+                                placeholder="Sélectionnez une société de portage"
+                                options={[
+                                    {
+                                        label: "Balkani",
+                                        value: ConsultantType.BALKANI
+                                    },
+                                    {
+                                        label: "Entrepreneur",
+                                        value: ConsultantType.ENTREPRENEUR
+                                    }
+                                ]}
+                                className="w-full"
                                 isError={formik.touched.type && !!formik.errors.type}
                             />
                             {formik.touched.type && formik.errors.type && (
