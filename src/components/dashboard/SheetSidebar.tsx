@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle} from "@/components/ui/sheet";
 import {usePathname, useRouter} from "next/navigation";
 import {routes} from "@/utils/routes";
-import {defaultUserImage, userImage} from "../../../public";
+import {defaultUserImage} from "../../../public";
 import Image from "next/image";
 import useGetMe from "@/hooks/auth/useGetMe";
 import CustomButton from "@/components/custom/CustomButton";
@@ -88,8 +88,7 @@ const SheetSidebar = ({isOpen, onClose}: SheetSidebarProps) => {
 
                     <div className="mt-auto flex flex-col gap-2.5">
                         <div
-                            className="flex gap-4 items-center px-4 cursor-pointer"
-                            onClick={() => router.push("/dashboard/profile")}
+                            className="flex gap-4 items-center px-4"
                         >
                             <Image
                                 src={defaultUserImage}

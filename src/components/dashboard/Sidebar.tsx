@@ -68,8 +68,7 @@ const Sidebar = () => {
 
                 <div className="mt-auto flex flex-col gap-2.5">
                     <div
-                        className="flex gap-4 items-center px-4 cursor-pointer"
-                        onClick={() => router.push("/dashboard/profile")}
+                        className="flex gap-4 items-center px-4"
                     >
                         <Image
                             src={defaultUserImage}
@@ -91,7 +90,7 @@ const Sidebar = () => {
                     </div>
                     <CustomButton
                         onClick={handleLogout}
-                        icon={ <LogOut className="size-5"/>}
+                        icon={<LogOut className="size-5"/>}
                     >
                         Déconnexion
                     </CustomButton>
