@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import useGetConsultants from "@/hooks/consultant/useGetConsultants";
 import ConsultantsTableSkeleton from "@/components/dashboard/consultant/ConsultantsTableSkeleton";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
@@ -6,6 +6,9 @@ import {ConsultantRole} from "@/types/consultant/ConsultantRole";
 import {ConsultantStatus} from "@/types/consultant/ConsultantStatus";
 import {formatDateToFR} from "@/utils/helpers/formatDateToFR";
 import ConsultantsTablePaginationControls from "@/components/dashboard/consultant/ConsultantsTablePaginationControls";
+import CustomButton from "@/components/custom/CustomButton";
+import {Consultant} from "@/types/consultant/Consultant";
+import UpdateConsultantRoleDialog from "@/components/dashboard/consultant/UpdateConsultantRoleDialog";
 
 interface ConsultantsTableProps {
     page?: number;
@@ -17,6 +20,10 @@ const ConsultantsTable = ({
                               setPage = () => {
                               }
                           }: ConsultantsTableProps) => {
+
+    const [consultant, setConsultant] = useState<Consultant | null>(null);
+    const [isUpdateRoleDialogOpen, setIsUpdateRoleDialogOpen] = useState<boolean>(false);
+
 
     const {
         isPending,
@@ -78,96 +85,136 @@ const ConsultantsTable = ({
         return `${value}`;
     };
 
-    return (
-        <div className="h-full overflow-y-auto">
-            {
-                isPending ? (
-                    <ConsultantsTableSkeleton/>
-                ) : isError ? (
-                    <div className="flex justify-center items-center text-center text-red-500 text-sm h-full">
-                        Une erreur est survenue lors du chargement des consultants.
-                    </div>
-                ) : consultants && consultants.data.length > 0 ? (
-                    <>
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader className="h-16">
-                                    <TableRow>
-                                        <TableHead className="text-[#475467] text-xs min-w-40">Nom complet</TableHead>
-                                        <TableHead className="text-[#475467] text-xs min-w-40">Email</TableHead>
-                                        <TableHead className="text-[#475467] text-xs min-w-24">Statut</TableHead>
-                                        <TableHead className="text-[#475467] text-xs min-w-32">Date de début</TableHead>
-                                        <TableHead className="text-[#475467] text-xs min-w-32">Date de fin</TableHead>
-                                        <TableHead className="text-[#475467] text-xs min-w-32">Bureau</TableHead>
-                                        <TableHead className="text-[#475467] text-xs min-w-40">Société de
-                                            portage</TableHead>
-                                        <TableHead className="text-[#475467] text-xs min-w-28">Rôle</TableHead>
-                                        <TableHead className="text-[#475467] text-xs min-w-32">Estimation
-                                            mensuelle</TableHead>
-                                        <TableHead className="text-[#475467] text-xs min-w-28">Performance</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {consultants.data.map((consultant) => (
-                                        <TableRow
-                                            key={consultant.id}
-                                            className="cursor-pointer hover:bg-gray-50 h-16"
-                                        >
-                                            <TableCell className="text-sm text-[#101828] font-medium">
-                                                {`${consultant.firstname} ${consultant.lastname}`}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-[#475467]">
-                                                {consultant.email}
-                                            </TableCell>
-                                            <TableCell className="text-sm">
-                                                {getStatusBadge(consultant.status)}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-[#475467]">
-                                                {formatDateToFR(consultant.startDate)}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-[#475467]">
-                                                {formatDateToFR(consultant.endDate)}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-[#475467]">
-                                                {consultant.office}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-[#475467]">
-                                                {consultant.portage}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-[#475467]">
-                                                {getRoleLabel(consultant.role)}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-[#475467]">
-                                                {formatCurrency(consultant.monthlyEstimation)}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-[#475467]">
-                                                {formatPerformance(consultant.performance)}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
+    const handleUpdateRoleClick = (consultant: Consultant) => {
+        setConsultant(consultant);
+        setIsUpdateRoleDialogOpen(true);
+    }
 
-                        <ConsultantsTablePaginationControls
-                            currentPage={consultants.page}
-                            totalCount={consultants.total}
-                            perPage={consultants.perPage}
-                            onPageChange={handlePageChange}
-                        />
-                    </>
-                ) : (
-                    <div className="h-full flex flex-col justify-center items-center gap-0.5">
-                        <p className="font-semibold text-center text-2xl text-[#101828]">
-                            Pas encore de consultants
-                        </p>
-                        <p className="text-center text-sm text-[#525866] font-medium">
-                            Aucun consultant n&apos;a encore été ajouté
-                        </p>
-                    </div>
-                )
+    return (
+        <>
+
+            {
+                consultant && isUpdateRoleDialogOpen ? (
+                    <UpdateConsultantRoleDialog
+                        isOpen={isUpdateRoleDialogOpen}
+                        onClose={() => setIsUpdateRoleDialogOpen(false)}
+                        consultant={consultant}
+                        page={page}
+                    />
+                ) : null
             }
-        </div>
+
+            <div className="h-full overflow-y-auto">
+                {
+                    isPending ? (
+                        <ConsultantsTableSkeleton/>
+                    ) : isError ? (
+                        <div className="flex justify-center items-center text-center text-red-500 text-sm h-full">
+                            Une erreur est survenue lors du chargement des consultants.
+                        </div>
+                    ) : consultants && consultants.data.length > 0 ? (
+                        <>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader className="h-16">
+                                        <TableRow>
+                                            <TableHead className="text-[#475467] text-xs min-w-40">Nom
+                                                complet</TableHead>
+                                            <TableHead className="text-[#475467] text-xs min-w-40">Email</TableHead>
+                                            <TableHead className="text-[#475467] text-xs min-w-24">Statut</TableHead>
+                                            <TableHead className="text-[#475467] text-xs min-w-32">Date de
+                                                début</TableHead>
+                                            <TableHead className="text-[#475467] text-xs min-w-32">Date de
+                                                fin</TableHead>
+                                            <TableHead className="text-[#475467] text-xs min-w-32">Bureau</TableHead>
+                                            <TableHead className="text-[#475467] text-xs min-w-40">Société de
+                                                portage</TableHead>
+                                            <TableHead className="text-[#475467] text-xs min-w-28">Rôle</TableHead>
+                                            <TableHead className="text-[#475467] text-xs min-w-32">Estimation
+                                                mensuelle</TableHead>
+                                            <TableHead
+                                                className="text-[#475467] text-xs min-w-28">Performance</TableHead>
+                                            <TableHead className="text-[#475467] text-xs min-w-28">
+                                                Actions
+                                            </TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {consultants.data.map((consultant) => (
+                                            <TableRow
+                                                key={consultant.id}
+                                                className="cursor-pointer hover:bg-gray-50 h-16"
+                                            >
+                                                <TableCell className="text-sm text-[#101828] font-medium">
+                                                    {`${consultant.firstname} ${consultant.lastname}`}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-[#475467]">
+                                                    {consultant.email}
+                                                </TableCell>
+                                                <TableCell className="text-sm">
+                                                    {getStatusBadge(consultant.status)}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-[#475467]">
+                                                    {formatDateToFR(consultant.startDate)}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-[#475467]">
+                                                    {formatDateToFR(consultant.endDate)}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-[#475467]">
+                                                    {consultant.office}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-[#475467]">
+                                                    {consultant.portage}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-[#475467]">
+                                                    {getRoleLabel(consultant.role)}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-[#475467]">
+                                                    {formatCurrency(consultant.monthlyEstimation)}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-[#475467]">
+                                                    {formatPerformance(consultant.performance)}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-[#475467]">
+                                                    <div className="flex gap-2">
+                                                        <CustomButton
+                                                            onClick={() => handleUpdateRoleClick(consultant)}
+                                                        >
+                                                            Modifier le role
+                                                        </CustomButton>
+                                                        <CustomButton
+                                                            className="bg-red-600 hover:bg-red-700 text-white"
+                                                        >
+                                                            Supprimer
+                                                        </CustomButton>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            <ConsultantsTablePaginationControls
+                                currentPage={consultants.page}
+                                totalCount={consultants.total}
+                                perPage={consultants.perPage}
+                                onPageChange={handlePageChange}
+                            />
+                        </>
+                    ) : (
+                        <div className="h-full flex flex-col justify-center items-center gap-0.5">
+                            <p className="font-semibold text-center text-2xl text-[#101828]">
+                                Pas encore de consultants
+                            </p>
+                            <p className="text-center text-sm text-[#525866] font-medium">
+                                Aucun consultant n&apos;a encore été ajouté
+                            </p>
+                        </div>
+                    )
+                }
+            </div>
+        </>
     );
 };
 
