@@ -22,6 +22,7 @@ import {toast} from "sonner";
 import {ConsultantType} from "@/types/consultant/ConsultantType";
 import {handleCreateConsultantError} from "@/utils/helpers/handleCreateConsultantError";
 import {useQueryClient} from "@tanstack/react-query";
+import {GET_CONSULTANTS_DEFAULT_PER_PAGE} from "@/hooks/consultant/useGetConsultants";
 
 interface AddNewUserDialogProps {
     isOpen: boolean;
@@ -62,7 +63,8 @@ const validationSchema = Yup.object({
 
 const AddNewConsultantDialog = ({
                                     isOpen,
-                                    onClose
+                                    onClose,
+                                    page
                                 }: AddNewUserDialogProps) => {
 
     const queryClient = useQueryClient();
@@ -112,8 +114,9 @@ const AddNewConsultantDialog = ({
                 })
 
                 await queryClient.invalidateQueries({
-                    queryKey: ['get-consultants'],
-                    exact: false
+                    queryKey: ['get-consultants', page ?? 1, GET_CONSULTANTS_DEFAULT_PER_PAGE],
+                    type: 'all',
+                    exact: true,
                 });
 
 

@@ -1,7 +1,8 @@
 import {
     Users,
     Briefcase,
-    Building
+    Building,
+    ArrowLeftRight
 } from "lucide-react";
 
 export const routes = [
@@ -22,5 +23,11 @@ export const routes = [
         name: "Office",
         routeName: "/dashboard/office",
         icon: Building,
+    },
+    {
+        id: 4,
+        name: "Transactions",
+        routeName: "/dashboard/transactions",
+        icon: ArrowLeftRight,
     }
 ];
