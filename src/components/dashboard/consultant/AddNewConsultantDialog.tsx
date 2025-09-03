@@ -62,7 +62,7 @@ const validationSchema = Yup.object({
 const AddNewConsultantDialog = ({
                                     isOpen,
                                     onClose,
-                                    page = 1
+                                    page
                                 }: AddNewUserDialogProps) => {
 
     const queryClient = useQueryClient();
@@ -95,7 +95,7 @@ const AddNewConsultantDialog = ({
             officeId: ''
         },
         validationSchema,
-        onSubmit: async (values) => {
+        onSubmit: async (values, {resetForm}) => {
             try {
                 await mutateAsync({
                     firstname: values.firstName,
@@ -122,6 +122,8 @@ const AddNewConsultantDialog = ({
                     className: "!bg-[#CBF5E5] !text-[#176448] !border !border-[#CBF5E5]",
                     descriptionClassName: "!text-[#176448] !text-sm"
                 });
+
+                resetForm();
 
                 onClose();
 

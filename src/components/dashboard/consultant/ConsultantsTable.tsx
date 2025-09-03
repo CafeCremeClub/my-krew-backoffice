@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import useGetConsultants from "@/hooks/consultant/useGetConsultants";
 import ConsultantsTableSkeleton from "@/components/dashboard/consultant/ConsultantsTableSkeleton";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
@@ -13,7 +13,7 @@ interface ConsultantsTableProps {
 }
 
 const ConsultantsTable = ({
-                              page = 1,
+                              page,
                               setPage = () => {
                               }
                           }: ConsultantsTableProps) => {
@@ -79,7 +79,7 @@ const ConsultantsTable = ({
     };
 
     return (
-        <div className="overflow-hidden h-full">
+        <div className="h-full overflow-y-auto">
             {
                 isPending ? (
                     <ConsultantsTableSkeleton/>
