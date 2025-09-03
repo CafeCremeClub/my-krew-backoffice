@@ -17,13 +17,14 @@ const ConsultantsPageHeader = ({page = 1}: ConsultantsPageHeaderProps) => {
                 isOpen={isAddUserDialogOpen}
                 onClose={() => setIsAddUserDialogOpen(false)}
             />
-            <div className="flex items-center justify-between gap-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
                 <p className="text-[#101828] font-semibold text-lg">
                     Liste des utilisateurs
                 </p>
 
                 <CustomButton
                     onClick={() => setIsAddUserDialogOpen(true)}
+                    className="sm:w-max w-full"
                 >
                     Ajouter un utilisateur
                 </CustomButton>

@@ -4,9 +4,14 @@ import Image from "next/image";
 import {defaultUserImage} from "../../../public";
 import {usePathname, useRouter} from "next/navigation";
 import useGetMe from "@/hooks/auth/useGetMe";
+import CustomButton from "@/components/custom/CustomButton";
+import {logout} from "@/app/actions/logout";
+import {useQueryClient} from "@tanstack/react-query";
+import {LogOut} from "lucide-react";
 
 const Sidebar = () => {
 
+    const queryClient = useQueryClient();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -21,6 +26,13 @@ const Sidebar = () => {
         isPending,
         data
     } = useGetMe();
+
+
+    const handleLogout = async () => {
+        await logout();
+        queryClient.clear();
+        router.replace("/auth/signin");
+    }
 
     useEffect(() => {
         const currentRoute = routes.find(route => route.routeName === pathname);
@@ -54,27 +66,35 @@ const Sidebar = () => {
                     ))
                 }
 
-                <div
-                    className="mt-auto flex gap-4 items-center px-4 cursor-pointer"
-                    onClick={() => router.push("/dashboard/profile")}
-                >
-                    <Image
-                        src={defaultUserImage}
-                        alt="user image"
-                        width={40}
-                        height={40}
-                        className="rounded-full object-cover object-center"
-                    />
-                    {
-                        isPending ?
-                            <div
-                                className="h-8 rounded w-28 bg-gray-200 animate-pulse"
-                            /> :
-                            data && data.firstname && data.lastname ?
-                                <p className="text-sm font-medium leading-6">
-                                    Hello, <b className="font-semibold">{data.firstname} {data.lastname}</b>
-                                </p> : null
-                    }
+                <div className="mt-auto flex flex-col gap-2.5">
+                    <div
+                        className="flex gap-4 items-center px-4 cursor-pointer"
+                        onClick={() => router.push("/dashboard/profile")}
+                    >
+                        <Image
+                            src={defaultUserImage}
+                            alt="user image"
+                            width={40}
+                            height={40}
+                            className="rounded-full object-cover object-center"
+                        />
+                        {
+                            isPending ?
+                                <div
+                                    className="h-8 rounded w-28 bg-gray-200 animate-pulse"
+                                /> :
+                                data && data.firstname && data.lastname ?
+                                    <p className="text-sm font-medium leading-6">
+                                        Hello, <b className="font-semibold">{data.firstname} {data.lastname}</b>
+                                    </p> : null
+                        }
+                    </div>
+                    <CustomButton
+                        onClick={handleLogout}
+                        icon={ <LogOut className="size-5"/>}
+                    >
+                        Déconnexion
+                    </CustomButton>
                 </div>
             </div>
         </div>
