@@ -1,4 +1,5 @@
 import {ReferralUser} from "@/types/referral/ReferralUser";
+import {ReferralStatus} from "@/types/referral/ReferralStatus";
 
 
 export interface Referral {
@@ -7,7 +8,7 @@ export interface Referral {
     referee: ReferralUser;
     startDate: string;
     endDate: string;
-    status: string;
+    status: ReferralStatus;
     amount: string;
     creationDate: string;
 }
