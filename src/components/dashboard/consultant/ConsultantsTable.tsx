@@ -9,6 +9,7 @@ import ConsultantsTablePaginationControls from "@/components/dashboard/consultan
 import CustomButton from "@/components/custom/CustomButton";
 import {Consultant} from "@/types/consultant/Consultant";
 import UpdateConsultantRoleDialog from "@/components/dashboard/consultant/UpdateConsultantRoleDialog";
+import DeleteConsultantAlertDialog from "@/components/dashboard/consultant/DeleteConsultantAlertDialog";
 
 interface ConsultantsTableProps {
     page?: number;
@@ -23,6 +24,7 @@ const ConsultantsTable = ({
 
     const [consultant, setConsultant] = useState<Consultant | null>(null);
     const [isUpdateRoleDialogOpen, setIsUpdateRoleDialogOpen] = useState<boolean>(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
 
     const {
@@ -71,6 +73,46 @@ const ConsultantsTable = ({
         }
     };
 
+    const getRoleBadge = (role: ConsultantRole) => {
+        const getRoleConfig = (role: ConsultantRole) => {
+            switch (role) {
+                case ConsultantRole.AMBASSADOR:
+                    return {
+                        label: 'Ambassadeur',
+                        className: 'bg-purple-100 text-purple-800 border-purple-200'
+                    };
+                case ConsultantRole.INFLUENCER:
+                    return {
+                        label: 'Influenceur',
+                        className: 'bg-blue-100 text-blue-800 border-blue-200'
+                    };
+                case ConsultantRole.ELITE:
+                    return {
+                        label: 'Élite',
+                        className: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                    };
+                case ConsultantRole.NONE:
+                    return {
+                        label: 'Aucun',
+                        className: 'bg-gray-100 text-gray-800 border-gray-200'
+                    };
+                default:
+                    return {
+                        label: role,
+                        className: 'bg-gray-100 text-gray-800 border-gray-200'
+                    };
+            }
+        };
+
+        const roleConfig = getRoleConfig(role);
+        return (
+            <span
+                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${roleConfig.className}`}>
+                {roleConfig.label}
+            </span>
+        );
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('fr-FR', {
             style: 'currency',
@@ -90,6 +132,11 @@ const ConsultantsTable = ({
         setIsUpdateRoleDialogOpen(true);
     }
 
+    const handleDeleteClick = (consultant: Consultant) => {
+        setConsultant(consultant);
+        setIsDeleteDialogOpen(true);
+    }
+
     return (
         <>
 
@@ -97,7 +144,24 @@ const ConsultantsTable = ({
                 consultant && isUpdateRoleDialogOpen ? (
                     <UpdateConsultantRoleDialog
                         isOpen={isUpdateRoleDialogOpen}
-                        onClose={() => setIsUpdateRoleDialogOpen(false)}
+                        onClose={() => {
+                            setIsUpdateRoleDialogOpen(false)
+                            setConsultant(null)
+                        }}
+                        consultant={consultant}
+                        page={page}
+                    />
+                ) : null
+            }
+
+            {
+                consultant && isDeleteDialogOpen ? (
+                    <DeleteConsultantAlertDialog
+                        open={isDeleteDialogOpen}
+                        onClose={() => {
+                            setIsDeleteDialogOpen(false)
+                            setConsultant(null)
+                        }}
                         consultant={consultant}
                         page={page}
                     />
@@ -166,8 +230,8 @@ const ConsultantsTable = ({
                                                 <TableCell className="text-sm text-[#475467]">
                                                     {consultant.portage}
                                                 </TableCell>
-                                                <TableCell className="text-sm text-[#475467]">
-                                                    {getRoleLabel(consultant.role)}
+                                                <TableCell className="text-sm">
+                                                    {getRoleBadge(consultant.role)}
                                                 </TableCell>
                                                 <TableCell className="text-sm text-[#475467]">
                                                     {formatCurrency(consultant.monthlyEstimation)}
@@ -184,6 +248,7 @@ const ConsultantsTable = ({
                                                         </CustomButton>
                                                         <CustomButton
                                                             className="bg-red-600 hover:bg-red-700 text-white"
+                                                            onClick={() => handleDeleteClick(consultant)}
                                                         >
                                                             Supprimer
                                                         </CustomButton>

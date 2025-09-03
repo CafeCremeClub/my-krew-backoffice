@@ -47,3 +47,11 @@ export const updateConsultantRole = async (payload: UpdateConsultantRolePayload)
         throw error;
     }
 }
+
+export const deleteConsultant = async (id: string): Promise<void> => {
+    try {
+        await axiosInstance.delete(`/users/${id}`);
+    } catch (error) {
+        throw error;
+    }
+}
