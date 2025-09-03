@@ -3,6 +3,7 @@
 import React, {useState} from 'react';
 import CustomButton from "@/components/custom/CustomButton";
 import AddNewPortageDialog from "./AddNewPortageDialog";
+import {Plus} from "lucide-react";
 
 const PortagePageHeader = () => {
 
@@ -22,6 +23,7 @@ const PortagePageHeader = () => {
                 <CustomButton
                     onClick={() => setIsAddPortageDialogOpen(true)}
                     className="sm:w-max w-full"
+                    icon={<Plus className="flex-none size-5"/>}
                 >
                     Ajouter un portage
                 </CustomButton>

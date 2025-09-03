@@ -55,8 +55,8 @@ const Sidebar = () => {
                     routes.map((route, index) => (
                         <button
                             key={index}
-                            className={`flex items-center gap-4 w-full py-2.5 px-4 text-black text-sm font-semibold cursor-pointer hover:bg-[#F9FAFB] ${
-                                selectedRoute === route.routeName ? "bg-[#F9FAFB]" : ""
+                            className={`flex items-center gap-4 w-full py-2.5 px-4 text-black text-sm font-semibold rounded cursor-pointer hover:bg-[#F9FAFB] ${
+                                selectedRoute === route.routeName ? "bg-[#F4F6FF]" : ""
                             }`}
                             onClick={() => onRoutePress(route.routeName)}
                         >

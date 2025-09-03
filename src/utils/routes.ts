@@ -2,7 +2,7 @@ import {
     Users,
     Briefcase,
     Building,
-    ArrowLeftRight
+    ArrowLeftRight, Repeat
 } from "lucide-react";
 
 export const routes = [
@@ -29,5 +29,11 @@ export const routes = [
         name: "Transactions",
         routeName: "/dashboard/transactions",
         icon: ArrowLeftRight,
+    },
+    {
+        id: 5,
+        name: "Cooptation",
+        routeName: "/dashboard/referrals",
+        icon: Repeat,
     }
 ];

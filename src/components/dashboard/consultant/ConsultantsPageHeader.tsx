@@ -3,6 +3,7 @@
 import React, {useState} from 'react';
 import CustomButton from "@/components/custom/CustomButton";
 import AddNewConsultantDialog from "@/components/dashboard/consultant/AddNewConsultantDialog";
+import {Plus} from "lucide-react";
 
 interface ConsultantsPageHeaderProps {
     page?: number;
@@ -27,6 +28,7 @@ const ConsultantsPageHeader = ({page = 1}: ConsultantsPageHeaderProps) => {
                 <CustomButton
                     onClick={() => setIsAddUserDialogOpen(true)}
                     className="sm:w-max w-full"
+                    icon={<Plus className="flex-none size-5"/>}
                 >
                     Ajouter un utilisateur
                 </CustomButton>

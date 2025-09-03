@@ -3,6 +3,7 @@
 import React, {useState} from 'react';
 import CustomButton from "@/components/custom/CustomButton";
 import AddNewOfficeDialog from "./AddNewOfficeDialog";
+import {Plus} from "lucide-react";
 
 const OfficePageHeader = () => {
 
@@ -18,6 +19,7 @@ const OfficePageHeader = () => {
                 <CustomButton
                     onClick={() => setIsAddOfficeDialogOpen(true)}
                     className="sm:w-max w-full"
+                    icon={<Plus className="flex-none size-5"/>}
                 >
                     Ajouter un bureau
                 </CustomButton>
