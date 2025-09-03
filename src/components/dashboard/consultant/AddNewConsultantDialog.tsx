@@ -21,7 +21,7 @@ import useCreateConsultant from "@/hooks/consultant/useCreateConsultant";
 import {toast} from "sonner";
 import {ConsultantType} from "@/types/consultant/ConsultantType";
 import {handleCreateConsultantError} from "@/utils/helpers/handleCreateConsultantError";
-import useGetConsultants from "@/hooks/consultant/useGetConsultants";
+import {useQueryClient} from "@tanstack/react-query";
 
 interface AddNewUserDialogProps {
     isOpen: boolean;
@@ -65,6 +65,8 @@ const AddNewConsultantDialog = ({
                                     onClose
                                 }: AddNewUserDialogProps) => {
 
+    const queryClient = useQueryClient();
+
     const {
         isPending,
         mutateAsync
@@ -79,10 +81,6 @@ const AddNewConsultantDialog = ({
         isPending: isOfficesPending,
         data: officesData
     } = useGetOffices();
-
-    const {
-        refetch
-    } = useGetConsultants();
 
     const formik = useFormik({
         initialValues: {
@@ -113,7 +111,11 @@ const AddNewConsultantDialog = ({
                     officeId: values.officeId
                 })
 
-                await refetch();
+                await queryClient.invalidateQueries({
+                    queryKey: ['get-consultants'],
+                    exact: false
+                });
+
 
                 toast.success("Consultant créé", {
                     description: "Le consultant a été créé avec succès.",
@@ -123,7 +125,6 @@ const AddNewConsultantDialog = ({
                 });
 
                 resetForm();
-
                 onClose();
 
             } catch (error) {

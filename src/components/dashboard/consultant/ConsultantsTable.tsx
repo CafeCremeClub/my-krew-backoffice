@@ -58,21 +58,6 @@ const ConsultantsTable = ({
         );
     };
 
-    const getRoleLabel = (role: ConsultantRole) => {
-        switch (role) {
-            case ConsultantRole.AMBASSADOR:
-                return 'Ambassadeur';
-            case ConsultantRole.INFLUENCER:
-                return 'Influenceur';
-            case ConsultantRole.ELITE:
-                return 'Élite';
-            case ConsultantRole.NONE:
-                return 'Aucun';
-            default:
-                return role;
-        }
-    };
-
     const getRoleBadge = (role: ConsultantRole) => {
         const getRoleConfig = (role: ConsultantRole) => {
             switch (role) {

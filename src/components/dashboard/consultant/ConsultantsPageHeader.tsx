@@ -1,3 +1,5 @@
+"use client";
+
 import React, {useState} from 'react';
 import CustomButton from "@/components/custom/CustomButton";
 import AddNewConsultantDialog from "@/components/dashboard/consultant/AddNewConsultantDialog";
