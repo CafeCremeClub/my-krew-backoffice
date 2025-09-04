@@ -78,9 +78,13 @@ const ReferralsTable = () => {
         }).format(numericAmount);
     };
 
-    const isDeletedReferral = (referral: Referral) => {
+    const isDeletedReferre = (referral: Referral) => {
         return referral.referee.email.includes("deleted-");
     };
+
+    const isDeletedReferrer = (referral: Referral) => {
+        return referral.referrer.email.includes("deleted-");
+    }
 
     return (
         <>
@@ -119,45 +123,63 @@ const ReferralsTable = () => {
                                     </TableHeader>
                                     <TableBody>
                                         {referrals.data.map((referral) => {
-                                            const isDeleted = isDeletedReferral(referral);
+                                            const deletedReferre = isDeletedReferre(referral);
+                                            const deletedReferrer = isDeletedReferrer(referral);
                                             return (
                                                 <TableRow
                                                     key={referral.id}
-                                                    className={`cursor-pointer hover:bg-gray-50 h-16 ${isDeleted ? 'bg-red-50 border-l-4 border-red-400' : ''}`}
+                                                    className={`cursor-pointer hover:bg-gray-50 h-16 ${
+                                                        deletedReferre || deletedReferrer ? 'bg-red-50 border-l-4 border-red-400' : ''}`
+                                                    }
                                                 >
                                                     <TableCell
-                                                        className={`text-sm font-medium ${isDeleted ? 'text-red-600' : 'text-[#101828]'}`}>
-                                                        {isDeleted ? '***' : `${referral.referrer.firstname} ${referral.referrer.lastname}`}
+                                                        className={`text-sm font-medium ${deletedReferrer ? 'text-red-600' : 'text-[#101828]'}`}>
+                                                        {deletedReferrer ? <span
+                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span> : `${referral.referrer.firstname} ${referral.referrer.lastname}`}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`text-sm ${isDeleted ? 'text-red-600' : 'text-[#475467]'}`}>
-                                                        {isDeleted ? '***' : referral.referrer.email}
+                                                        className={`text-sm ${deletedReferrer ? 'text-red-600' : 'text-[#475467]'}`}>
+                                                        {deletedReferrer ? <span
+                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span> : referral.referrer.email}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`text-sm ${isDeleted ? 'text-red-600' : 'text-[#475467]'}`}>
-                                                        {isDeleted ? '***' : referral.referrer.phone}
+                                                        className={`text-sm ${deletedReferrer ? 'text-red-600' : 'text-[#475467]'}`}>
+                                                        {deletedReferrer ? <span
+                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span> : referral.referrer.phone}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`text-sm font-medium ${isDeleted ? 'text-red-600' : 'text-[#101828]'}`}>
-                                                        {isDeleted ? (
+                                                        className={`text-sm font-medium ${deletedReferre ? 'text-red-600' : 'text-[#101828]'}`}>
+                                                        {deletedReferre ? (
                                                             <span
                                                                 className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                                                                Cooptation supprimé
+                                                                Supprimé
                                                             </span>
                                                         ) : (
                                                             `${referral.referee.firstname} ${referral.referee.lastname}`
                                                         )}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`text-sm ${isDeleted ? 'text-red-600' : 'text-[#475467]'}`}>
-                                                        {isDeleted ? '***' : referral.referee.email}
+                                                        className={`text-sm ${deletedReferre ? 'text-red-600' : 'text-[#475467]'}`}>
+                                                        {deletedReferre ? <span
+                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span> : referral.referee.email}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`text-sm ${isDeleted ? 'text-red-600' : 'text-[#475467]'}`}>
-                                                        {isDeleted ? '***' : referral.referee.phone}
+                                                        className={`text-sm ${deletedReferre ? 'text-red-600' : 'text-[#475467]'}`}>
+                                                        {deletedReferre ? <span
+                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span> : referral.referee.phone}
                                                     </TableCell>
                                                     <TableCell className="text-sm">
-                                                        {isDeleted ? (
+                                                        {deletedReferre ? (
                                                             <span
                                                                 className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
                                                                 Supprimé
@@ -167,20 +189,24 @@ const ReferralsTable = () => {
                                                         )}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`text-sm ${isDeleted ? 'text-red-600' : 'text-[#475467]'}`}>
-                                                        {isDeleted ? '***' : formatCurrency(referral.amount)}
+                                                        className="text-sm text-[#475467]"
+                                                    >
+                                                        {formatCurrency(referral.amount)}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`text-sm ${isDeleted ? 'text-red-600' : 'text-[#475467]'}`}>
-                                                        {isDeleted ? '***' : formatDateToFR(referral.startDate)}
+                                                        className="text-sm text-[#475467]"
+                                                    >
+                                                        {formatDateToFR(referral.startDate)}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`text-sm ${isDeleted ? 'text-red-600' : 'text-[#475467]'}`}>
-                                                        {isDeleted ? '***' : formatDateToFR(referral.endDate)}
+                                                        className="text-sm text-[#475467]"
+                                                    >
+                                                        {formatDateToFR(referral.endDate)}
                                                     </TableCell>
                                                     <TableCell
-                                                        className={`text-sm ${isDeleted ? 'text-red-600' : 'text-[#475467]'}`}>
-                                                        {isDeleted ? '***' : formatDateToFR(referral.creationDate)}
+                                                        className="text-sm text-[#475467]"
+                                                    >
+                                                        {formatDateToFR(referral.creationDate)}
                                                     </TableCell>
                                                 </TableRow>
                                             );
