@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
     Dialog,
     DialogContent,
@@ -20,6 +20,7 @@ import {toast} from "sonner";
 import {useQueryClient} from "@tanstack/react-query";
 import {ReferralStatus} from "@/types/referral/ReferralStatus";
 import {GET_REFERRALS_DEFAULT_PER_PAGE} from "@/hooks/referral/useGetReferrals";
+import CustomSelectWithDropDown from "@/components/custom/CustomSelectWithDropDown";
 
 interface AddNewReferralDialogProps {
     isOpen: boolean;
@@ -54,16 +55,50 @@ const AddNewReferralDialog = ({
                               }: AddNewReferralDialogProps) => {
 
     const queryClient = useQueryClient();
+    const [consultantSearchQuery, setConsultantSearchQuery] = useState<string>('');
+    const [referrerSearchQuery, setReferrerSearchQuery] = useState<string>('');
 
     const {
         isPending,
         mutateAsync
     } = useCreateReferral();
 
+    // Separate hooks for referrer and referee data
     const {
-        isPending: isConsultantsPending,
-        data: consultantsData
-    } = useGetConsultants();
+        isPending: isReferrersPending,
+        data: referrersData,
+        isFetching: isReferrersFetching
+    } = useGetConsultants({
+        search: referrerSearchQuery || undefined
+    });
+
+    const {
+        isPending: isRefereesPending,
+        data: refereesData,
+        isFetching: isRefereesFetching
+    } = useGetConsultants({
+        search: consultantSearchQuery || undefined
+    });
+
+    const handleReferrerSearch = (query: string) => {
+        setReferrerSearchQuery(query);
+    }
+
+    const handleConsultantSearch = (query: string) => {
+        setConsultantSearchQuery(query);
+    }
+
+    const handleReferrerSelect = (value: string) => {
+        formik.setFieldValue('referrerId', value);
+        // Reset search query to show all consultants
+        setReferrerSearchQuery('');
+    }
+
+    const handleRefereeSelect = (value: string) => {
+        formik.setFieldValue('refereeId', value);
+        // Reset search query to show all consultants
+        setConsultantSearchQuery('');
+    }
 
     const formik = useFormik({
         initialValues: {
@@ -117,7 +152,14 @@ const AddNewReferralDialog = ({
     });
 
     // Transform consultants data for CustomSelect
-    const consultantOptions = consultantsData?.data?.map(consultant => ({
+    const referrerOptions = referrersData?.data?.map(consultant => ({
+        key: consultant.id,
+        label: `${consultant.firstname} ${consultant.lastname} (${consultant.email})`,
+        value: consultant.id
+    })) || [];
+
+    const refereeOptions = refereesData?.data?.map(consultant => ({
+        key: consultant.id,
         label: `${consultant.firstname} ${consultant.lastname} (${consultant.email})`,
         value: consultant.id
     })) || [];
@@ -154,13 +196,15 @@ const AddNewReferralDialog = ({
                         {/* Referrer Select */}
                         <div className="flex flex-col gap-1.5">
                             <Label htmlFor="referrerId">Parrain</Label>
-                            <CustomSelect
+                            <CustomSelectWithDropDown
                                 placeholder="Sélectionnez le parrain"
-                                options={consultantOptions}
+                                items={referrerOptions}
                                 value={formik.values.referrerId}
-                                onChange={(value) => formik.setFieldValue('referrerId', value)}
+                                onChange={handleReferrerSelect}
+                                onSearch={handleReferrerSearch}
+                                isSearching={isReferrersFetching}
                                 isError={formik.touched.referrerId && !!formik.errors.referrerId}
-                                disabled={isConsultantsPending}
+                                disabled={isReferrersPending}
                                 className="w-full"
                             />
                             {formik.touched.referrerId && formik.errors.referrerId && (
@@ -173,13 +217,15 @@ const AddNewReferralDialog = ({
                         {/* Referee Select */}
                         <div className="flex flex-col gap-1.5">
                             <Label htmlFor="refereeId">Filleul</Label>
-                            <CustomSelect
+                            <CustomSelectWithDropDown
                                 placeholder="Sélectionnez le filleul"
-                                options={consultantOptions}
+                                items={refereeOptions}
                                 value={formik.values.refereeId}
-                                onChange={(value) => formik.setFieldValue('refereeId', value)}
+                                onChange={handleRefereeSelect}
+                                onSearch={handleConsultantSearch}
+                                isSearching={isRefereesFetching}
                                 isError={formik.touched.refereeId && !!formik.errors.refereeId}
-                                disabled={isConsultantsPending}
+                                disabled={isRefereesPending}
                                 className="w-full"
                             />
                             {formik.touched.refereeId && formik.errors.refereeId && (
