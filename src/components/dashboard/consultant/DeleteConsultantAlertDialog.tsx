@@ -42,7 +42,7 @@ const DeleteConsultantAlertDialog = ({
             await mutateAsync(consultant.id)
 
             queryClient.setQueryData(
-                ['get-consultants', page ?? 1, GET_CONSULTANTS_DEFAULT_PER_PAGE],
+                ['get-consultants', page ?? 1, GET_CONSULTANTS_DEFAULT_PER_PAGE, undefined],
                 (oldData: GetConsultantsResponse) => {
                     if (!oldData) return oldData;
 

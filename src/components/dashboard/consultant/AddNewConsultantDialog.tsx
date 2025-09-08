@@ -114,7 +114,7 @@ const AddNewConsultantDialog = ({
                 })
 
                 await queryClient.invalidateQueries({
-                    queryKey: ['get-consultants', page ?? 1, GET_CONSULTANTS_DEFAULT_PER_PAGE],
+                    queryKey: ['get-consultants', page ?? 1, GET_CONSULTANTS_DEFAULT_PER_PAGE, undefined],
                     type: 'all',
                     exact: true,
                 });
