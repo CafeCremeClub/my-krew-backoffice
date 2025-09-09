@@ -10,6 +10,7 @@ import {formatDateToFR} from "@/utils/helpers/formatDateToFR";
 import TransactionsTablePaginationControls
     from "@/components/dashboard/transaction/TransactionsTablePaginationControls";
 import TransactionsTableSkeleton from "@/components/dashboard/transaction/TransactionsTableSkeleton";
+import {Transaction} from "@/types/transaction/Transaction";
 
 
 const TransactionsTable = () => {
@@ -119,6 +120,10 @@ const TransactionsTable = () => {
         }).format(numericAmount);
     };
 
+    const isDeletedConsultant = (transaction: Transaction) => {
+        return transaction.email.includes("deleted-");
+    };
+
 
     return (
         <>
@@ -153,40 +158,84 @@ const TransactionsTable = () => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {transactions.data.map((transaction) => (
-                                            <TableRow
-                                                key={transaction.id}
-                                                className="cursor-pointer hover:bg-gray-50 h-16"
-                                            >
-                                                <TableCell className="text-sm text-[#101828] font-medium">
-                                                    {`${transaction.firstname} ${transaction.lastname}`}
-                                                </TableCell>
-                                                <TableCell className="text-sm text-[#475467]">
-                                                    {transaction.email}
-                                                </TableCell>
-                                                <TableCell className="text-sm text-[#475467]">
-                                                    {transaction.phone}
-                                                </TableCell>
-                                                <TableCell className="text-sm">
-                                                    {getTransactionTypeBadge(transaction.type)}
-                                                </TableCell>
-                                                <TableCell className="text-sm">
-                                                    {getTransactionStatusBadge(transaction.status)}
-                                                </TableCell>
-                                                <TableCell className="text-sm">
-                                                    {getConsultantStatusBadge(transaction.consultantStatus)}
-                                                </TableCell>
-                                                <TableCell className="text-sm text-[#475467]">
-                                                    {formatCurrency(transaction.gross)}
-                                                </TableCell>
-                                                <TableCell className="text-sm text-[#475467]">
-                                                    {formatCurrency(transaction.net)}
-                                                </TableCell>
-                                                <TableCell className="text-sm text-[#475467]">
-                                                    {formatDateToFR(transaction.date)}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
+                                        {transactions.data.map((transaction) => {
+                                            const deletedConsultant = isDeletedConsultant(transaction);
+                                            return (
+                                                <TableRow
+                                                    key={transaction.id}
+                                                    className={`cursor-pointer hover:bg-gray-50 h-16 ${
+                                                        deletedConsultant ? 'bg-red-50 border-l-4 border-red-400' : ''
+                                                    }`}
+                                                >
+                                                    <TableCell
+                                                        className={`text-sm font-medium ${deletedConsultant ? 'text-red-600' : 'text-[#101828]'}`}>
+                                                        {deletedConsultant ? <span
+                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span> : `${transaction.firstname} ${transaction.lastname}`}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        className={`text-sm ${deletedConsultant ? 'text-red-600' : 'text-[#475467]'}`}>
+                                                        {deletedConsultant ? <span
+                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span> : transaction.email}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        className={`text-sm ${deletedConsultant ? 'text-red-600' : 'text-[#475467]'}`}>
+                                                        {deletedConsultant ? <span
+                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span> : transaction.phone}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm">
+                                                        {deletedConsultant ? (
+                                                            <span
+                                                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span>
+                                                        ) : (
+                                                            getTransactionTypeBadge(transaction.type)
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm">
+                                                        {deletedConsultant ? (
+                                                            <span
+                                                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span>
+                                                        ) : (
+                                                            getTransactionStatusBadge(transaction.status)
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm">
+                                                        {deletedConsultant ? (
+                                                            <span
+                                                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                                                Supprimé
+                                                            </span>
+                                                        ) : (
+                                                            getConsultantStatusBadge(transaction.consultantStatus)
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        className="text-sm text-[#475467]"
+                                                    >
+                                                        {formatCurrency(transaction.gross)}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        className="text-sm text-[#475467]"
+                                                    >
+                                                        {formatCurrency(transaction.net)}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        className="text-sm text-[#475467]"
+                                                    >
+                                                        {formatDateToFR(transaction.date)}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
                                     </TableBody>
                                 </Table>
                             </div>
