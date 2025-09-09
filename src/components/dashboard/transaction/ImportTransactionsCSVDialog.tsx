@@ -5,57 +5,48 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import CustomButton from "@/components/custom/CustomButton";
 import {FaFileCsv, FaUpload} from "react-icons/fa6";
 import {X, AlertCircle, CheckCircle} from "lucide-react";
-import useCreateCSVConsultants from "@/hooks/consultant/useCreateCSVConsultants";
-import {CreateCSVConsultantsPayload} from "@/types/consultant/CreateCSVConsultantsPayload";
-import {ConsultantType} from "@/types/consultant/ConsultantType";
+import useCreateCSVTransactions from "@/hooks/transaction/useCreateCSVTransactions";
+import {CreateCSVTransactionsPayload} from "@/types/transaction/CreateCSVTransactionsPayload";
+import {TransactionType} from "@/types/transaction/TransactionType";
+import {TransactionStatus} from "@/types/transaction/TransactionStatus";
 import {toast} from "sonner";
 import Papa from 'papaparse';
 import * as yup from 'yup';
 import {useQueryClient} from "@tanstack/react-query";
-import {GET_CONSULTANTS_DEFAULT_PER_PAGE} from "@/hooks/consultant/useGetConsultants";
-import {Consultant} from "@/types/consultant/Consultant";
-import {ConsultantRole} from "@/types/consultant/ConsultantRole";
-import {GetConsultantsResponse} from "@/types/consultant/GetConsultantsResponse";
-import useGetPortages from "@/hooks/portage/useGetPortages";
-import useGetOffices from "@/hooks/office/useGetOffices";
-import {ConsultantStatus} from "@/types/consultant/ConsultantStatus";
+import {GET_TRANSACTIONS_DEFAULT_PER_PAGE} from "@/hooks/transaction/useGetTransactions";
 
-interface ImportCSVDialogProps {
+interface ImportTransactionsCSVDialogProps {
     isOpen: boolean;
     onClose: () => void;
     page?: number;
 }
 
-type UserData = CreateCSVConsultantsPayload['users'][0];
+type TransactionData = CreateCSVTransactionsPayload['transactions'][0];
 
-interface CSVRowData extends UserData {
+interface CSVRowData extends TransactionData {
     rowIndex: number;
 }
 
 // Validation schema using yup
-const userValidationSchema = yup.object().shape({
+const transactionValidationSchema = yup.object().shape({
     email: yup.string().email('Email invalide').required('Email requis'),
-    firstname: yup.string().required('Prénom requis'),
-    lastname: yup.string().required('Nom requis'),
-    phone: yup.string().required('Téléphone requis'),
-    status: yup.string().oneOf(['active', 'inactive'], 'Statut invalide (active ou inactive)').required('Statut requis'),
-    type: yup.string().oneOf(Object.values(ConsultantType), `Type invalide (${Object.values(ConsultantType).join(', ')})`).required('Type requis'),
-    startDate: yup.string().matches(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').required('Date de début requise'),
-    endDate: yup.string().matches(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').required('Date de fin requise'),
-    portageId: yup.string().required('ID portage requis'),
-    officeId: yup.string().required('ID bureau requis')
+    gross: yup.number().min(0, 'Montant brut doit être positif').required('Montant brut requis'),
+    net: yup.number().min(0, 'Montant net doit être positif').required('Montant net requis'),
+    type: yup.string().oneOf(Object.values(TransactionType), `Type invalide (${Object.values(TransactionType).join(', ')})`).required('Type requis'),
+    status: yup.string().oneOf(Object.values(TransactionStatus), `Statut invalide (${Object.values(TransactionStatus).join(', ')})`).required('Statut requis'),
+    date: yup.string().matches(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').required('Date requise')
 });
 
-const validatePayload = (data: CSVRowData[]): { validData: UserData[], errors: string[] } => {
-    const validData: UserData[] = [];
+const validatePayload = (data: CSVRowData[]): { validData: TransactionData[], errors: string[] } => {
+    const validData: TransactionData[] = [];
     const errors: string[] = [];
 
     data.forEach((row) => {
         try {
             // Remove rowIndex for validation
-            const {...userData} = row;
-            userValidationSchema.validateSync(userData, {abortEarly: false});
-            validData.push(userData);
+            const {...transactionData} = row;
+            transactionValidationSchema.validateSync(transactionData, {abortEarly: false});
+            validData.push(transactionData);
         } catch (error) {
             if (error instanceof yup.ValidationError) {
                 error.errors.forEach(err => {
@@ -70,25 +61,17 @@ const validatePayload = (data: CSVRowData[]): { validData: UserData[], errors: s
     return {validData, errors};
 };
 
-const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
+const ImportTransactionsCSVDialog = ({isOpen, onClose, page}: ImportTransactionsCSVDialogProps) => {
 
     const queryClient = useQueryClient();
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [csvData, setCsvData] = useState<UserData[]>([]);
+    const [csvData, setCsvData] = useState<TransactionData[]>([]);
     const [errors, setErrors] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const {mutateAsync: createCSVConsultants, isPending} = useCreateCSVConsultants();
-
-    const {
-        data: portagesData
-    } = useGetPortages();
-
-    const {
-        data: officesData
-    } = useGetOffices();
+    const {mutateAsync: createCSVTransactions, isPending} = useCreateCSVTransactions();
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -113,8 +96,7 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
                 try {
                     // Expected headers
                     const expectedHeaders = [
-                        'email', 'firstname', 'lastname', 'phone', 'status',
-                        'type', 'startDate', 'endDate', 'portageId', 'officeId'
+                        'email', 'gross', 'net', 'type', 'status', 'date'
                     ];
 
                     // Validate headers
@@ -142,15 +124,11 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
                     // Add row index to data for validation error reporting
                     const dataWithRowIndex: CSVRowData[] = (results.data as CSVRowData[]).map((row, index) => ({
                         email: row.email || '',
-                        firstname: row.firstname || '',
-                        lastname: row.lastname || '',
-                        phone: row.phone || '',
-                        status: row.status || '',
+                        gross: parseFloat(row.gross.toString()) || 0,
+                        net: parseFloat(row.net.toString()) || 0,
                         type: row.type || '',
-                        startDate: row.startDate || '',
-                        endDate: row.endDate || '',
-                        portageId: row.portageId || '',
-                        officeId: row.officeId || '',
+                        status: row.status || '',
+                        date: row.date || '',
                         rowIndex: index + 2 // +2 because CSV row numbers start at 1 and we skip header
                     }));
 
@@ -180,56 +158,25 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
     const handleImport = async () => {
         if (csvData.length === 0) return;
 
-        const payload: CreateCSVConsultantsPayload = {
-            users: csvData
+        const payload: CreateCSVTransactionsPayload = {
+            transactions: csvData
         };
 
         try {
-            const res = await createCSVConsultants(payload);
+            await createCSVTransactions(payload);
 
-            // Create consultant objects from the response and CSV data
-            const createdConsultants: Consultant[] = res.map((consultant, index) => {
-                const csvUser = csvData[index];
-                const officeName = officesData?.find(office => office.id === csvUser.officeId)?.name || 'N/A';
-                const portageName = portagesData?.find(portage => portage.id === csvUser.portageId)?.name || 'N/A';
-
-                return {
-                    id: consultant.id,
-                    firstname: consultant.firstname,
-                    lastname: consultant.lastname,
-                    email: consultant.email,
-                    phone: consultant.phone,
-                    role: ConsultantRole.NONE,
-                    endDate: csvUser.endDate,
-                    monthlyEstimation: 0,
-                    office: officeName,
-                    performance: 0,
-                    portage: portageName,
-                    referrals: 0,
-                    startDate: csvUser.startDate,
-                    status: csvUser.status as ConsultantStatus,
-                    type: csvUser.type as ConsultantType,
-                };
+            // Update the cache with the new transactions
+            await queryClient.invalidateQueries({
+                queryKey: ['get-transactions', page ?? 1, GET_TRANSACTIONS_DEFAULT_PER_PAGE],
+                type: "all",
+                exact: true
             });
 
-            // Update the cache with the new consultants
-            const queryKey = ['get-consultants', page ?? 1, GET_CONSULTANTS_DEFAULT_PER_PAGE, undefined];
-            queryClient.setQueryData<GetConsultantsResponse>(queryKey, (oldData) => {
-                if (!oldData) return oldData;
-
-                return {
-                    ...oldData,
-                    total: oldData.total + createdConsultants.length,
-                    data: [...createdConsultants, ...oldData.data]
-                };
-            });
-
-            toast.success(`${csvData.length} consultant(s) importé(s) avec succès`, {
+            toast.success(`${csvData.length} transaction(s) importée(s) avec succès`, {
                 position: "bottom-right",
                 className: "!bg-[#CBF5E5] !text-[#176448] !border !border-[#CBF5E5]",
                 descriptionClassName: "!text-[#176448] !text-sm"
             });
-
 
             handleClose();
         } catch (error) {
@@ -237,7 +184,7 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
                 response?: { data?: { message?: string } }
             })?.response?.data?.message || "Erreur lors de l'importation";
 
-            toast.error("Échec de l'importation des consultants", {
+            toast.error("Échec de l'importation des transactions", {
                 description: errorMessage,
                 position: "bottom-right",
                 className: "!bg-[#DF1C41] !text-white",
@@ -267,7 +214,7 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <FaFileCsv className="size-5 text-blue-600"/>
-                        Importer des consultants via CSV
+                        Importer des transactions via CSV
                     </DialogTitle>
                 </DialogHeader>
 
@@ -277,7 +224,7 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                             <FaUpload className="mx-auto size-12 text-gray-400 mb-4"/>
                             <p className="text-sm text-gray-600 mb-4">
-                                Sélectionnez un fichier CSV contenant les données des consultants
+                                Sélectionnez un fichier CSV contenant les données des transactions
                             </p>
                             <CustomButton
                                 onClick={triggerFileInput}
@@ -327,20 +274,17 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
                         </p>
                         <div className="text-xs font-mono bg-white p-2 rounded border">
                             email,
-                            firstname,
-                            lastname,
-                            phone,
-                            status,
+                            gross,
+                            net,
                             type,
-                            startDate,
-                            endDate,
-                            portageId,
-                            officeId
+                            status,
+                            date
                         </div>
                         <p className="text-xs text-blue-700 mt-2">
-                            • type: {Object.values(ConsultantType).join(', ')}<br/>
-                            • status: active, inactive<br/>
-                            • Dates au format: YYYY-MM-DD
+                            • type: {Object.values(TransactionType).join(', ')}<br/>
+                            • status: {Object.values(TransactionStatus).join(', ')}<br/>
+                            • Dates au format: YYYY-MM-DD<br/>
+                            • gross/net: montants numériques (ex: 1500.50)
                         </p>
                     </div>
 
@@ -365,7 +309,7 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
                             <div className="flex items-center gap-2 mb-2">
                                 <CheckCircle className="size-4 text-green-600"/>
                                 <h4 className="font-medium text-green-900">
-                                    Fichier validé - {csvData.length} consultant(s) prêt(s) à être importé(s)
+                                    Fichier validé - {csvData.length} transaction(s) prête(s) à être importée(s)
                                 </h4>
                             </div>
                             <div className="text-sm text-green-800">
@@ -373,7 +317,7 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
                                 <div className="bg-white p-2 rounded border text-xs">
                                     {csvData.slice(0, 3).map((row, index) => (
                                         <div key={index} className="mb-1">
-                                            {row.email} - {row.firstname} {row.lastname} ({row.type})
+                                            {row.email} - {row.gross}€ ({row.type}) - {row.status}
                                         </div>
                                     ))}
                                     {csvData.length > 3 && (
@@ -391,7 +335,7 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
                             disabled={csvData.length === 0 || errors.length > 0 || isPending}
                             isLoading={isPending}
                         >
-                            {isPending ? "Importation..." : `Importer ${csvData.length} consultant(s)`}
+                            {isPending ? "Importation..." : `Importer ${csvData.length} transaction(s)`}
                         </CustomButton>
                     </div>
                 </div>
@@ -400,4 +344,4 @@ const ImportCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProps) => {
     );
 };
 
-export default ImportCSVDialog;
+export default ImportTransactionsCSVDialog;

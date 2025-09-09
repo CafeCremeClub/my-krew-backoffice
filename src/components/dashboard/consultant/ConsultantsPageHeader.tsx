@@ -3,7 +3,7 @@
 import React, {useState} from 'react';
 import CustomButton from "@/components/custom/CustomButton";
 import AddNewConsultantDialog from "@/components/dashboard/consultant/AddNewConsultantDialog";
-import ImportCSVDialog from "@/components/dashboard/consultant/ImportCSVDialog";
+import ImportConsultantsCSVDialog from "@/components/dashboard/consultant/ImportConsultantsCSVDialog";
 import {Plus} from "lucide-react";
 import {FaFileCsv} from "react-icons/fa6";
 
@@ -23,7 +23,7 @@ const ConsultantsPageHeader = ({page = 1}: ConsultantsPageHeaderProps) => {
                 isOpen={isAddUserDialogOpen}
                 onClose={() => setIsAddUserDialogOpen(false)}
             />
-            <ImportCSVDialog
+            <ImportConsultantsCSVDialog
                 page={page}
                 isOpen={isImportCSVDialogOpen}
                 onClose={() => setIsImportCSVDialogOpen(false)}

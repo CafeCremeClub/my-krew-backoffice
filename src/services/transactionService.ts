@@ -3,6 +3,7 @@ import {GetTransactionsResponse} from "@/types/transaction/GetTransactionsRespon
 import {CreateTransactionPayload} from "@/types/transaction/CreateTransactionPayload";
 import {Transaction} from "@/types/transaction/Transaction";
 import axiosInstance from "@/config/axiosInstance";
+import {CreateCSVTransactionsPayload} from "@/types/transaction/CreateCSVTransactionsPayload";
 
 
 export const getTransactions = async (params?: GetTransactionsParams): Promise<GetTransactionsResponse> => {
@@ -38,6 +39,15 @@ export const createTransaction = async (payload: CreateTransactionPayload): Prom
             status: payload.status,
             date: payload.date
         });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const createCSVTransactions = async (payload: CreateCSVTransactionsPayload): Promise<Transaction[]> => {
+    try {
+        const response = await axiosInstance.post<Transaction[]>('/transactions/batch', payload);
         return response.data;
     } catch (error) {
         throw error;
