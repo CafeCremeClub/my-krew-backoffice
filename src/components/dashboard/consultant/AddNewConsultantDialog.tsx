@@ -23,6 +23,9 @@ import {ConsultantType} from "@/types/consultant/ConsultantType";
 import {handleCreateConsultantError} from "@/utils/helpers/handleCreateConsultantError";
 import {useQueryClient} from "@tanstack/react-query";
 import {GET_CONSULTANTS_DEFAULT_PER_PAGE} from "@/hooks/consultant/useGetConsultants";
+import {Consultant} from "@/types/consultant/Consultant";
+import {ConsultantRole} from "@/types/consultant/ConsultantRole";
+import {GetConsultantsResponse} from "@/types/consultant/GetConsultantsResponse";
 
 interface AddNewUserDialogProps {
     isOpen: boolean;
@@ -100,7 +103,7 @@ const AddNewConsultantDialog = ({
         validationSchema,
         onSubmit: async (values, {resetForm}) => {
             try {
-                await mutateAsync({
+                const res = await mutateAsync({
                     firstname: values.firstName,
                     lastname: values.lastName,
                     email: values.email,
@@ -113,10 +116,37 @@ const AddNewConsultantDialog = ({
                     officeId: values.officeId
                 })
 
-                await queryClient.invalidateQueries({
-                    queryKey: ['get-consultants', page ?? 1, GET_CONSULTANTS_DEFAULT_PER_PAGE, undefined],
-                    type: 'all',
-                    exact: true,
+                const officeName = officesData?.find(office => office.id === values.officeId)?.name || 'N/A';
+                const portageName = portagesData?.find(portage => portage.id === values.portageId)?.name || 'N/A';
+
+                const createdConsultant: Consultant = {
+                    id: res.id,
+                    firstname: res.firstname,
+                    lastname: res.lastname,
+                    email: res.email,
+                    phone: res.phone,
+                    role: ConsultantRole.NONE,
+                    endDate: values.endDate,
+                    monthlyEstimation: 0,
+                    office: officeName,
+                    performance: null,
+                    portage: portageName,
+                    referrals: 0,
+                    startDate: values.startDate,
+                    status: values.status,
+                    type: values.type as ConsultantType,
+                }
+
+                // Update the cache with the new consultant
+                const queryKey = ['get-consultants', page ?? 1, GET_CONSULTANTS_DEFAULT_PER_PAGE, undefined];
+                queryClient.setQueryData<GetConsultantsResponse>(queryKey, (oldData) => {
+                    if (!oldData) return oldData;
+
+                    return {
+                        ...oldData,
+                        total: oldData.total + 1,
+                        data: [createdConsultant, ...oldData.data]
+                    };
                 });
 
 

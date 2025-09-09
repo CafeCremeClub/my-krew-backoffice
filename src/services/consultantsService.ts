@@ -3,6 +3,7 @@ import {GetConsultantsParams} from "@/types/consultant/GetConsultantsParams";
 import axiosInstance from "@/config/axiosInstance";
 import {CreateConsultantPayload} from "@/types/consultant/CreateConsultantPayload";
 import {UpdateConsultantRolePayload} from "@/types/consultant/UpdateConsultantRolePayload";
+import {CreateConsultantResponse} from "@/types/consultant/CreateConsultantResponse";
 
 export const getConsultants = async (params?: GetConsultantsParams): Promise<GetConsultantsResponse> => {
     try {
@@ -29,9 +30,10 @@ export const getConsultants = async (params?: GetConsultantsParams): Promise<Get
 }
 
 
-export const createConsultant = async (payload: CreateConsultantPayload): Promise<void> => {
+export const createConsultant = async (payload: CreateConsultantPayload): Promise<CreateConsultantResponse> => {
     try {
-        await axiosInstance.post<void>("/users/register", payload)
+        const response = await axiosInstance.post<CreateConsultantResponse>("/users/register", payload)
+        return response.data;
     } catch (error) {
         throw error;
     }

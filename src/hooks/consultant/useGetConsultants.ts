@@ -22,8 +22,7 @@ const useGetConsultants = (params?: GetConsultantsParams) => {
         ],
         queryFn: async () => await getConsultants(mergedParams),
         retry: 0,
-        refetchOnMount: "always",
-        refetchOnWindowFocus: false,
+        refetchOnMount: false,
         refetchInterval: false,
         // Disable caching when there's a search query to ensure fresh data
         staleTime: mergedParams.search ? 0 : 5 * 60 * 1000, // 0 for search, 5 minutes for normal queries
