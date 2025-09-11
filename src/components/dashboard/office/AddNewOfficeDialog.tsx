@@ -26,10 +26,7 @@ interface AddNewOfficeDialogProps {
 const validationSchema = Yup.object({
     name: Yup.string()
         .min(2, 'Le nom doit contenir au moins 2 caractères')
-        .required('Nom requis'),
-    whatsApp: Yup.string()
-        .matches(/^[+]?[0-9\s\-()]{10,}$/, 'Numéro WhatsApp invalide')
-        .required('WhatsApp requis')
+        .required('Nom requis')
 });
 
 const AddNewOfficeDialog = ({
@@ -52,8 +49,7 @@ const AddNewOfficeDialog = ({
         onSubmit: async (values, {resetForm}) => {
             try {
                 await mutateAsync({
-                    name: values.name,
-                    whatsApp: values.whatsApp
+                    name: values.name
                 })
 
                 await queryClient.invalidateQueries({
@@ -115,26 +111,6 @@ const AddNewOfficeDialog = ({
                             {formik.touched.name && formik.errors.name && (
                                 <CustomErrorIndicator
                                     message={formik.errors.name}
-                                />
-                            )}
-                        </div>
-
-                        {/* WhatsApp */}
-                        <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="whatsApp">WhatsApp</Label>
-                            <CustomInput
-                                id="whatsApp"
-                                name="whatsApp"
-                                type="tel"
-                                placeholder="+33 1 23 45 67 89"
-                                value={formik.values.whatsApp}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                isError={formik.touched.whatsApp && !!formik.errors.whatsApp}
-                            />
-                            {formik.touched.whatsApp && formik.errors.whatsApp && (
-                                <CustomErrorIndicator
-                                    message={formik.errors.whatsApp}
                                 />
                             )}
                         </div>

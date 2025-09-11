@@ -13,7 +13,6 @@ const OfficesTableSkeleton = () => {
                     <TableHeader className="h-16">
                         <TableRow>
                             <TableHead className="text-[#475467] text-xs min-w-40">Nom</TableHead>
-                            <TableHead className="text-[#475467] text-xs min-w-40">WhatsApp</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -22,10 +21,6 @@ const OfficesTableSkeleton = () => {
                                 {/* Nom */}
                                 <TableCell>
                                     <Skeleton className="h-4 w-32"/>
-                                </TableCell>
-                                {/* WhatsApp */}
-                                <TableCell>
-                                    <Skeleton className="h-4 w-36"/>
                                 </TableCell>
                             </TableRow>
                         ))}

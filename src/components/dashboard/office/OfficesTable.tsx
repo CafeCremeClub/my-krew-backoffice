@@ -13,11 +13,6 @@ const OfficesTable = () => {
         data: offices
     } = useGetOffices();
 
-    const formatWhatsAppNumber = (whatsApp: string) => {
-        // Format the WhatsApp number for better display
-        return whatsApp.replace(/(\+\d{2})(\d{1})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5 $6');
-    };
-
     return (
         <div className="h-full overflow-y-auto">
             {
@@ -33,7 +28,6 @@ const OfficesTable = () => {
                             <TableHeader className="h-16">
                                 <TableRow>
                                     <TableHead className="text-[#475467] text-xs min-w-40">Nom</TableHead>
-                                    <TableHead className="text-[#475467] text-xs min-w-40">WhatsApp</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -44,16 +38,6 @@ const OfficesTable = () => {
                                     >
                                         <TableCell className="text-sm text-[#101828] font-medium">
                                             {office.name}
-                                        </TableCell>
-                                        <TableCell className="text-sm text-[#475467]">
-                                            <a
-                                                href={`https://wa.me/${office.whatsApp.replace(/\s+/g, '')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-green-600 hover:text-green-800 hover:underline"
-                                            >
-                                                {formatWhatsAppNumber(office.whatsApp)}
-                                            </a>
                                         </TableCell>
                                     </TableRow>
                                 ))}
