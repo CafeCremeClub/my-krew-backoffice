@@ -20,7 +20,7 @@ export const routes = [
     },
     {
         id: 3,
-        name: "Office",
+        name: "LLP",
         routeName: "/dashboard/office",
         icon: Building,
     },
