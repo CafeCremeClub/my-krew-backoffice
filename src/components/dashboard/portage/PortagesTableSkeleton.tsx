@@ -12,12 +12,17 @@ const PortagesTableSkeleton = () => {
                 <Table>
                     <TableHeader className="h-16">
                         <TableRow>
+                            <TableHead className="text-[#475467] text-xs min-w-40">ID</TableHead>
                             <TableHead className="text-[#475467] text-xs min-w-40">Nom</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {skeletonRows.map((index) => (
                             <TableRow key={index} className="h-16">
+                                {/* ID */}
+                                <TableCell>
+                                    <Skeleton className="h-4 w-32"/>
+                                </TableCell>
                                 {/* Nom */}
                                 <TableCell>
                                     <Skeleton className="h-4 w-32"/>

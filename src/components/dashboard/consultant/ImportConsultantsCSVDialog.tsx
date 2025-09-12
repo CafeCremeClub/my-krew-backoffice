@@ -159,6 +159,29 @@ const ImportConsultantsCSVDialog = ({isOpen, onClose, page}: ImportCSVDialogProp
 
                     if (validationErrors.length > 0) {
                         setErrors(validationErrors);
+                        setIsProcessing(false);
+                        return;
+                    }
+
+                    // Validate portageId and officeId existence
+                    const dataValidationErrors: string[] = [];
+
+                    validData.forEach((row, index) => {
+                        const rowNumber = index + 2; // +2 because CSV row numbers start at 1 and we skip header
+
+                        // Check if portageId exists
+                        if (row.portageId && !portagesData?.find(portage => portage.id === row.portageId)) {
+                            dataValidationErrors.push(`Ligne ${rowNumber}: ID portage "${row.portageId}" introuvable. Vérifiez que cet ID existe dans les données.`);
+                        }
+
+                        // Check if officeId exists
+                        if (row.officeId && !officesData?.find(office => office.id === row.officeId)) {
+                            dataValidationErrors.push(`Ligne ${rowNumber}: ID bureau "${row.officeId}" introuvable. Vérifiez que cet ID existe dans les données.`);
+                        }
+                    });
+
+                    if (dataValidationErrors.length > 0) {
+                        setErrors(dataValidationErrors);
                     } else {
                         setCsvData(validData);
                     }
