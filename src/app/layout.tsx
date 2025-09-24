@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "MyKrew | Back Office",
-    description: "Tableau de bord administratif pour gérer les consultants, les bureaux, les transactions, les parrainages et les opérations de portage, avec une authentification complète des utilisateurs et un contrôle d’accès basé sur les rôles."
+    title: "My Krew | Back Office",
+    description: "Gérez vos consultants et transactions."
 };
 
 export default function RootLayout({
