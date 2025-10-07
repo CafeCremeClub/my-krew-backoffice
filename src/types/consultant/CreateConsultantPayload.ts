@@ -6,7 +6,7 @@ export interface CreateConsultantPayload {
   status: string;
   type: string;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   portageId: string;
   officeId: string;
 }

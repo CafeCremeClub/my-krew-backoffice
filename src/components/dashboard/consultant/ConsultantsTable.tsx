@@ -242,7 +242,9 @@ const ConsultantsTable = ({
                         {formatDateToFR(consultant.startDate)}
                       </TableCell>
                       <TableCell className="text-sm text-[#475467]">
-                        {formatDateToFR(consultant.endDate)}
+                        {consultant.endDate
+                          ? formatDateToFR(consultant.endDate)
+                          : 'N/A'}
                       </TableCell>
                       <TableCell className="text-sm text-[#475467]">
                         {consultant.office}

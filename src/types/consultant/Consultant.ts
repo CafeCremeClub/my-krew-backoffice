@@ -11,7 +11,7 @@ export interface Consultant {
   status: ConsultantStatus;
   type: ConsultantType;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   office: string;
   portage: string;
   role: ConsultantRole;

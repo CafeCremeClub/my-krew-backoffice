@@ -9,7 +9,6 @@ import { Eye, EyeOff } from 'lucide-react';
 interface CustomInputProps {
   className?: string;
   isError?: boolean;
-  /** Optional icon to render on the left side of the input */
   leftIcon?: React.ReactNode;
 }
 
@@ -27,7 +26,6 @@ const CustomInput = ({
 
   return (
     <div className="relative w-full h-max">
-      {/* Left icon, if provided */}
       {leftIcon && (
         <span className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center text-gray-500">
           {leftIcon}
@@ -36,8 +34,7 @@ const CustomInput = ({
       <Input
         type={inputType}
         className={cn(
-          'cursor-pointer shadow-md shadow-[#E4E5E73D] h-[2.5rem] px-3 bg-white rounded-[0.625rem] text-[#0A0D14] text-sm focus:outline-none focus:!ring-0 placeholder:text-[#868C98] placeholder:text-sm',
-          // Border styles, change if error
+          'shadow-md shadow-[#E4E5E73D] h-[2.5rem] px-3 bg-white rounded-[0.625rem] text-[#0A0D14] text-sm focus:outline-none focus:!ring-0 placeholder:text-[#868C98] placeholder:text-sm',
           isError
             ? 'border border-[#DF1C41] focus:border-[#DF1C41]'
             : 'border border-[#E2E4E9] focus:border focus:!border-gray-400',
@@ -47,7 +44,6 @@ const CustomInput = ({
         {...props}
       />
 
-      {/* Password eye toggle */}
       {type === 'password' && (
         <Button
           type="button"

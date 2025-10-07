@@ -9,7 +9,7 @@ export interface CreateCSVConsultantsPayload {
     status: string;
     type: ConsultantType;
     startDate: string;
-    endDate: string;
+    endDate?: string;
     portageId: string;
     officeId: string;
   }[];

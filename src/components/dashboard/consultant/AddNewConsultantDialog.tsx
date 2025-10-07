@@ -26,14 +26,14 @@ import { GET_CONSULTANTS_DEFAULT_PER_PAGE } from '@/hooks/consultant/useGetConsu
 import { Consultant } from '@/types/consultant/Consultant';
 import { ConsultantRole } from '@/types/consultant/ConsultantRole';
 import { GetConsultantsResponse } from '@/types/consultant/GetConsultantsResponse';
+import { CreateConsultantPayload } from '@/types/consultant/CreateConsultantPayload';
 
 interface AddNewUserDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  page?: number; // Optional, if you want to handle pagination
+  page?: number;
 }
 
-// Validation schema using Yup
 const validationSchema = Yup.object({
   email: Yup.string().email('Email invalide').required('Email requis'),
   firstName: Yup.string()
@@ -53,11 +53,11 @@ const validationSchema = Yup.object({
     .required('Type requis'),
   startDate: Yup.date().required('Date de début requise'),
   endDate: Yup.date()
+    .nullable()
     .min(
       Yup.ref('startDate'),
       'La date de fin doit être postérieure à la date de début'
-    )
-    .required('Date de fin requise'),
+    ),
   portageId: Yup.string().required('Société de portage requise'),
   officeId: Yup.string().required('Bureau requis'),
 });
@@ -91,7 +91,7 @@ const AddNewConsultantDialog = ({
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
       try {
-        const res = await mutateAsync({
+        const payload: CreateConsultantPayload = {
           firstname: values.firstName,
           lastname: values.lastName,
           email: values.email,
@@ -99,10 +99,15 @@ const AddNewConsultantDialog = ({
           status: values.status,
           type: values.type,
           startDate: values.startDate,
-          endDate: values.endDate,
           portageId: values.portageId,
           officeId: values.officeId,
-        });
+        };
+
+        if (values.endDate) {
+          payload.endDate = values.endDate;
+        }
+
+        const res = await mutateAsync(payload);
 
         const officeName =
           officesData?.find((office) => office.id === values.officeId)?.name ||
@@ -118,7 +123,7 @@ const AddNewConsultantDialog = ({
           email: res.email,
           phone: res.phone,
           role: ConsultantRole.NONE,
-          endDate: values.endDate,
+          endDate: values.endDate || undefined,
           monthlyEstimation: 0,
           office: officeName,
           performance: null,
@@ -129,7 +134,6 @@ const AddNewConsultantDialog = ({
           type: values.type as ConsultantType,
         };
 
-        // Update the cache with the new consultant
         const queryKey = [
           'get-consultants',
           page ?? 1,
@@ -170,14 +174,12 @@ const AddNewConsultantDialog = ({
     },
   });
 
-  // Transform portages data for CustomSelect
   const portageOptions =
     portagesData?.map((portage) => ({
       label: portage.name,
       value: portage.id,
     })) || [];
 
-  // Transform offices data for CustomSelect
   const officeOptions =
     officesData?.map((office) => ({
       label: office.name,
@@ -186,7 +188,7 @@ const AddNewConsultantDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-xl p-1 rounded-[1.25rem] px-2 max-h-[95vh] overflow-y-auto hidden-scrollbar">
+      <DialogContent className="sm:max-w-xl p-1 rounded-[1rem] px-2 max-h-[95vh] overflow-y-auto hidden-scrollbar">
         <div className="bg-white rounded-2xl overflow-hidden flex flex-col gap-10 py-6 px-2">
           <DialogHeader>
             <DialogTitle>Ajouter un nouvel consultant</DialogTitle>
@@ -344,7 +346,7 @@ const AddNewConsultantDialog = ({
 
             {/* End Date */}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="endDate">Date de fin</Label>
+              <Label htmlFor="endDate">Date de fin (optionnelle)</Label>
               <CustomInput
                 id="endDate"
                 name="endDate"

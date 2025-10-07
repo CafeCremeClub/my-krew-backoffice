@@ -37,7 +37,6 @@ interface CSVRowData extends UserData {
   rowIndex: number;
 }
 
-// Validation schema using yup
 const userValidationSchema = yup.object().shape({
   email: yup.string().email('Email invalide').required('Email requis'),
   firstname: yup.string().required('Prénom requis'),
@@ -60,8 +59,8 @@ const userValidationSchema = yup.object().shape({
     .required('Date de début requise'),
   endDate: yup
     .string()
-    .matches(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)')
-    .required('Date de fin requise'),
+    .nullable()
+    .matches(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)'),
   portageId: yup.string().required('ID portage requis'),
   officeId: yup.string().required('ID bureau requis'),
 });
@@ -74,7 +73,6 @@ const validatePayload = (
 
   data.forEach((row) => {
     try {
-      // Remove rowIndex for validation
       const { ...userData } = row;
       userValidationSchema.validateSync(userData, { abortEarly: false });
       validData.push(userData);
@@ -133,8 +131,7 @@ const ImportConsultantsCSVDialog = ({
       transform: (value: string) => value.trim(),
       complete: (results) => {
         try {
-          // Expected headers
-          const expectedHeaders = [
+          const requiredHeaders = [
             'email',
             'firstname',
             'lastname',
@@ -142,14 +139,12 @@ const ImportConsultantsCSVDialog = ({
             'status',
             'type',
             'startDate',
-            'endDate',
             'portageId',
             'officeId',
           ];
 
-          // Validate headers
           const actualHeaders = results.meta.fields || [];
-          const missingHeaders = expectedHeaders.filter(
+          const missingHeaders = requiredHeaders.filter(
             (header) => !actualHeaders.includes(header)
           );
 
@@ -159,7 +154,6 @@ const ImportConsultantsCSVDialog = ({
             return;
           }
 
-          // Check for parsing errors
           if (results.errors.length > 0) {
             const parseErrors = results.errors.map(
               (error) =>
@@ -172,24 +166,29 @@ const ImportConsultantsCSVDialog = ({
             return;
           }
 
-          // Add row index to data for validation error reporting
           const dataWithRowIndex: CSVRowData[] = (
             results.data as CSVRowData[]
-          ).map((row, index) => ({
-            email: row.email || '',
-            firstname: row.firstname || '',
-            lastname: row.lastname || '',
-            phone: row.phone || '',
-            status: row.status || '',
-            type: row.type || '',
-            startDate: row.startDate || '',
-            endDate: row.endDate || '',
-            portageId: row.portageId || '',
-            officeId: row.officeId || '',
-            rowIndex: index + 2, // +2 because CSV row numbers start at 1 and we skip header
-          }));
+          ).map((row, index) => {
+            const rowData: CSVRowData = {
+              email: row.email || '',
+              firstname: row.firstname || '',
+              lastname: row.lastname || '',
+              phone: row.phone || '',
+              status: row.status || '',
+              type: row.type || '',
+              startDate: row.startDate || '',
+              portageId: row.portageId || '',
+              officeId: row.officeId || '',
+              rowIndex: index + 2,
+            };
 
-          // Validate data using yup
+            if (row.endDate) {
+              rowData.endDate = row.endDate;
+            }
+
+            return rowData;
+          });
+
           const { validData, errors: validationErrors } =
             validatePayload(dataWithRowIndex);
 
@@ -199,13 +198,11 @@ const ImportConsultantsCSVDialog = ({
             return;
           }
 
-          // Validate portageId and officeId existence
           const dataValidationErrors: string[] = [];
 
           validData.forEach((row, index) => {
-            const rowNumber = index + 2; // +2 because CSV row numbers start at 1 and we skip header
+            const rowNumber = index + 2;
 
-            // Check if portageId exists
             if (
               row.portageId &&
               !portagesData?.find((portage) => portage.id === row.portageId)
@@ -215,7 +212,6 @@ const ImportConsultantsCSVDialog = ({
               );
             }
 
-            // Check if officeId exists
             if (
               row.officeId &&
               !officesData?.find((office) => office.id === row.officeId)
@@ -255,7 +251,6 @@ const ImportConsultantsCSVDialog = ({
     try {
       const res = await createCSVConsultants(payload);
 
-      // Create consultant objects from the response and CSV data
       const createdConsultants: Consultant[] = res.map((consultant, index) => {
         const csvUser = csvData[index];
         const officeName =
@@ -272,7 +267,7 @@ const ImportConsultantsCSVDialog = ({
           email: consultant.email,
           phone: consultant.phone,
           role: ConsultantRole.NONE,
-          endDate: csvUser.endDate,
+          endDate: csvUser.endDate || undefined,
           monthlyEstimation: 0,
           office: officeName,
           performance: 0,
@@ -284,7 +279,6 @@ const ImportConsultantsCSVDialog = ({
         };
       });
 
-      // Update the cache with the new consultants
       const queryKey = [
         'get-consultants',
         page ?? 1,
@@ -417,7 +411,9 @@ const ImportConsultantsCSVDialog = ({
               • type: {Object.values(ConsultantType).join(', ')}
               <br />
               • status: active, inactive
-              <br />• Dates au format: YYYY-MM-DD
+              <br />
+              • Dates au format: YYYY-MM-DD
+              <br />• endDate est optionnelle (peut être laissée vide)
             </p>
           </div>
 

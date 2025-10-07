@@ -71,10 +71,7 @@ const Sidebar = () => {
               <div className="h-8 rounded w-28 bg-gray-200 animate-pulse" />
             ) : data && data.firstname && data.lastname ? (
               <p className="text-sm font-medium leading-6">
-                Hello,{' '}
-                <b className="font-semibold">
-                  {data.firstname} {data.lastname}
-                </b>
+                Hello, <b className="font-semibold">{data.firstname}</b>
               </p>
             ) : null}
           </div>
