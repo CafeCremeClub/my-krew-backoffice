@@ -20,6 +20,7 @@ interface DeleteConsultantAlertDialogProps {
   onClose: () => void;
   consultant: Consultant;
   page?: number;
+  onDeleteSuccess?: () => void;
 }
 
 const DeleteConsultantAlertDialog = ({
@@ -27,6 +28,7 @@ const DeleteConsultantAlertDialog = ({
   onClose,
   consultant,
   page,
+  onDeleteSuccess,
 }: DeleteConsultantAlertDialogProps) => {
   const queryClient = useQueryClient();
   const { isPending, mutateAsync } = useDeleteConsultant();
@@ -63,6 +65,10 @@ const DeleteConsultantAlertDialog = ({
       });
 
       onClose();
+
+      if (onDeleteSuccess) {
+        onDeleteSuccess();
+      }
     } catch (error) {
       console.error(error);
       toast.error('Échec de la suppression du consultant', {

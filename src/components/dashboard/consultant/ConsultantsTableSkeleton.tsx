@@ -10,7 +10,6 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ConsultantsTableSkeleton = () => {
-  // Create skeleton rows - typically 5-10 rows for a good skeleton effect
   const skeletonRows = Array.from({ length: 8 }, (_, index) => index);
 
   return (
@@ -48,6 +47,9 @@ const ConsultantsTableSkeleton = () => {
               </TableHead>
               <TableHead className="text-[#475467] text-xs min-w-28">
                 Performance
+              </TableHead>
+              <TableHead className="text-[#475467] text-xs min-w-28">
+                Actions
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -93,6 +95,10 @@ const ConsultantsTableSkeleton = () => {
                 {/* Performance */}
                 <TableCell>
                   <Skeleton className="h-4 w-8" />
+                </TableCell>
+                {/* Actions */}
+                <TableCell>
+                  <Skeleton className="h-9 w-20 rounded-md" />
                 </TableCell>
               </TableRow>
             ))}

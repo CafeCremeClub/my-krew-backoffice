@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import useGetConsultants from '@/hooks/consultant/useGetConsultants';
 import ConsultantsTableSkeleton from '@/components/dashboard/consultant/ConsultantsTableSkeleton';
 import {
@@ -14,11 +14,8 @@ import { ConsultantStatus } from '@/types/consultant/ConsultantStatus';
 import { formatDateToFR } from '@/utils/helpers/formatDateToFR';
 import ConsultantsTablePaginationControls from '@/components/dashboard/consultant/ConsultantsTablePaginationControls';
 import CustomButton from '@/components/custom/CustomButton';
-import { Consultant } from '@/types/consultant/Consultant';
-import UpdateConsultantRoleDialog from '@/components/dashboard/consultant/UpdateConsultantRoleDialog';
-import DeleteConsultantAlertDialog from '@/components/dashboard/consultant/DeleteConsultantAlertDialog';
-import { Pen, Plus, Trash } from 'lucide-react';
-import AddNewTransactionDialog from '@/components/dashboard/transaction/AddNewTransactionDialog';
+import { Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface ConsultantsTableProps {
   page?: number;
@@ -29,12 +26,7 @@ const ConsultantsTable = ({
   page,
   setPage = () => {},
 }: ConsultantsTableProps) => {
-  const [consultant, setConsultant] = useState<Consultant | null>(null);
-  const [isUpdateRoleDialogOpen, setIsUpdateRoleDialogOpen] =
-    useState<boolean>(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
-  const [isAddTransactionDialogOpen, setIsAddTransactionDialogOpen] =
-    useState<boolean>(false);
+  const router = useRouter();
 
   const {
     isPending,
@@ -122,59 +114,12 @@ const ConsultantsTable = ({
     return `${value}`;
   };
 
-  const handleUpdateRoleClick = (consultant: Consultant) => {
-    setConsultant(consultant);
-    setIsUpdateRoleDialogOpen(true);
-  };
-
-  const handleDeleteClick = (consultant: Consultant) => {
-    setConsultant(consultant);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleAddTransactionClick = (consultant: Consultant) => {
-    setConsultant(consultant);
-    setIsAddTransactionDialogOpen(true);
+  const handleViewDetails = (consultantId: string) => {
+    router.push(`/dashboard/consultants/${consultantId}`);
   };
 
   return (
     <>
-      {consultant && isUpdateRoleDialogOpen ? (
-        <UpdateConsultantRoleDialog
-          isOpen={isUpdateRoleDialogOpen}
-          onClose={() => {
-            setIsUpdateRoleDialogOpen(false);
-            setConsultant(null);
-          }}
-          consultant={consultant}
-          page={page}
-        />
-      ) : null}
-
-      {consultant && isDeleteDialogOpen ? (
-        <DeleteConsultantAlertDialog
-          open={isDeleteDialogOpen}
-          onClose={() => {
-            setIsDeleteDialogOpen(false);
-            setConsultant(null);
-          }}
-          consultant={consultant}
-          page={page}
-        />
-      ) : null}
-
-      {consultant && isAddTransactionDialogOpen ? (
-        <AddNewTransactionDialog
-          isOpen={isAddTransactionDialogOpen}
-          onClose={() => {
-            setIsAddTransactionDialogOpen(false);
-            setConsultant(null);
-          }}
-          consultant={consultant}
-          page={page}
-        />
-      ) : null}
-
       <div className="h-full overflow-y-auto">
         {isPending ? (
           <ConsultantsTableSkeleton />
@@ -264,25 +209,10 @@ const ConsultantsTable = ({
                       <TableCell className="text-sm text-[#475467]">
                         <div className="flex gap-2">
                           <CustomButton
-                            onClick={() =>
-                              handleAddTransactionClick(consultant)
-                            }
-                            icon={<Plus className="flex-none size-5" />}
+                            onClick={() => handleViewDetails(consultant.id)}
+                            icon={<Eye className="flex-none size-4" />}
                           >
-                            Ajouter une transaction
-                          </CustomButton>
-                          <CustomButton
-                            onClick={() => handleUpdateRoleClick(consultant)}
-                            icon={<Pen className="flex-none size-4" />}
-                          >
-                            Modifier le role
-                          </CustomButton>
-                          <CustomButton
-                            className="bg-red-600 hover:bg-red-700 text-white"
-                            onClick={() => handleDeleteClick(consultant)}
-                            icon={<Trash className="flex-none size-4" />}
-                          >
-                            Supprimer
+                            Voir
                           </CustomButton>
                         </div>
                       </TableCell>

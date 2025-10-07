@@ -1,16 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { UpdateConsultantRolePayload } from '@/types/consultant/UpdateConsultantRolePayload';
-import { updateConsultantRole } from '@/services/consultantsService';
+import { updateConsultant } from '@/services/consultantsService';
+import { UpdateConsultantPayload } from '@/types/consultant/UpdateConsultantPayload';
+import { toast } from 'sonner';
 import { Consultant } from '@/types/consultant/Consultant';
 import { GetConsultantsResponse } from '@/types/consultant/GetConsultantsResponse';
 
-const useUpdateConsultantRole = () => {
+const useUpdateConsultant = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ['update-consultant-role'],
-    mutationFn: async (payload: UpdateConsultantRolePayload) =>
-      await updateConsultantRole(payload),
+    mutationFn: (payload: UpdateConsultantPayload) => updateConsultant(payload),
     onMutate: async (variables) => {
       await queryClient.cancelQueries({
         queryKey: ['consultant', variables.id],
@@ -32,7 +31,13 @@ const useUpdateConsultantRole = () => {
           if (!old) return old;
           return {
             ...old,
-            role: variables.role,
+            monthlyEstimation:
+              variables.monthlyEstimation ?? old.monthlyEstimation,
+            performance: variables.performance ?? old.performance,
+            status: variables.status ?? old.status,
+            type: variables.type ?? old.type,
+            startDate: variables.startDate?.toISOString() ?? old.startDate,
+            endDate: variables.endDate?.toISOString() ?? old.endDate,
           };
         }
       );
@@ -45,7 +50,21 @@ const useUpdateConsultantRole = () => {
             ...old,
             data: old.data.map((consultant) =>
               consultant.id === variables.id
-                ? { ...consultant, role: variables.role }
+                ? {
+                    ...consultant,
+                    monthlyEstimation:
+                      variables.monthlyEstimation ??
+                      consultant.monthlyEstimation,
+                    performance:
+                      variables.performance ?? consultant.performance,
+                    status: variables.status ?? consultant.status,
+                    type: variables.type ?? consultant.type,
+                    startDate:
+                      variables.startDate?.toISOString() ??
+                      consultant.startDate,
+                    endDate:
+                      variables.endDate?.toISOString() ?? consultant.endDate,
+                  }
                 : consultant
             ),
           };
@@ -54,7 +73,7 @@ const useUpdateConsultantRole = () => {
 
       return { previousConsultant, previousConsultantsList };
     },
-    onError: (_error, variables, context) => {
+    onError: (error: unknown, variables, context) => {
       if (context?.previousConsultant) {
         queryClient.setQueryData(
           ['consultant', variables.id],
@@ -66,13 +85,18 @@ const useUpdateConsultantRole = () => {
           queryClient.setQueryData(queryKey, data);
         });
       }
+
+      const errorMessage =
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message ||
+        'Une erreur est survenue lors de la mise à jour du consultant';
+      toast.error(errorMessage);
     },
     onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: ['consultant', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['get-consultants'] });
     },
-    retry: 0,
   });
 };
 
-export default useUpdateConsultantRole;
+export default useUpdateConsultant;

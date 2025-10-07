@@ -21,11 +21,11 @@ const useGetConsultants = (params?: GetConsultantsParams) => {
     ],
     queryFn: async () => await getConsultants(mergedParams),
     retry: 0,
-    refetchOnMount: false,
+    refetchOnMount: 'always',
     refetchInterval: false,
-    // Disable caching when there's a search query to ensure fresh data
-    staleTime: mergedParams.search ? 0 : 5 * 60 * 1000, // 0 for search, 5 minutes for normal queries
-    gcTime: mergedParams.search ? 0 : 5 * 60 * 1000, // Immediately garbage collect search results
+    refetchOnWindowFocus: true,
+    staleTime: mergedParams.search ? 0 : 5 * 60 * 1000,
+    gcTime: mergedParams.search ? 0 : 5 * 60 * 1000,
   });
 };
 

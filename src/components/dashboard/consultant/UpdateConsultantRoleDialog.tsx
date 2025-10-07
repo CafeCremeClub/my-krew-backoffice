@@ -17,23 +17,18 @@ import * as Yup from 'yup';
 import { ConsultantRole } from '@/types/consultant/ConsultantRole';
 import { Consultant } from '@/types/consultant/Consultant';
 import useUpdateConsultantRole from '@/hooks/consultant/useUpdateConsultantRole';
-import { useQueryClient } from '@tanstack/react-query';
-import { GET_CONSULTANTS_DEFAULT_PER_PAGE } from '@/hooks/consultant/useGetConsultants';
 
 interface UpdateConsultantRoleDialogProps {
   isOpen: boolean;
   onClose: () => void;
   consultant: Consultant;
-  page?: number; // Optional, if you want to handle pagination
 }
 
 const UpdateConsultantRoleDialog = ({
   isOpen,
   onClose,
   consultant,
-  page,
 }: UpdateConsultantRoleDialogProps) => {
-  const queryClient = useQueryClient();
   const { isPending, mutateAsync } = useUpdateConsultantRole();
 
   const formik = useFormik({
@@ -49,17 +44,6 @@ const UpdateConsultantRoleDialog = ({
         await mutateAsync({
           id: consultant.id,
           role: values.role as ConsultantRole,
-        });
-
-        await queryClient.invalidateQueries({
-          queryKey: [
-            'get-consultants',
-            page ?? 1,
-            GET_CONSULTANTS_DEFAULT_PER_PAGE,
-            undefined,
-          ],
-          type: 'all',
-          exact: true,
         });
 
         toast.success('Consultant rôle mis à jour avec succès.', {

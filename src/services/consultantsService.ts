@@ -5,6 +5,8 @@ import { CreateConsultantPayload } from '@/types/consultant/CreateConsultantPayl
 import { UpdateConsultantRolePayload } from '@/types/consultant/UpdateConsultantRolePayload';
 import { CreateConsultantResponse } from '@/types/consultant/CreateConsultantResponse';
 import { CreateCSVConsultantsPayload } from '@/types/consultant/CreateCSVConsultantsPayload';
+import { GetConsultantByIdResponse } from '@/types/consultant/GetConsultantByIdResponse';
+import { UpdateConsultantPayload } from '@/types/consultant/UpdateConsultantPayload';
 
 export const getConsultants = async (
   params?: GetConsultantsParams
@@ -75,6 +77,30 @@ export const updateConsultantRole = async (
 export const deleteConsultant = async (id: string): Promise<void> => {
   try {
     await axiosInstance.delete(`/users/${id}`);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getConsultantById = async (
+  id: string
+): Promise<GetConsultantByIdResponse> => {
+  try {
+    const response = await axiosInstance.get<GetConsultantByIdResponse>(
+      `/consultants/admin/${id}`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateConsultant = async (
+  payload: UpdateConsultantPayload
+): Promise<void> => {
+  try {
+    const { id, ...data } = payload;
+    await axiosInstance.patch(`/consultants/update/${id}`, data);
   } catch (error) {
     throw error;
   }
