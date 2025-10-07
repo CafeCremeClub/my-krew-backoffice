@@ -1,36 +1,36 @@
-"use client";
+'use client';
 
-import React, {useState} from 'react';
-import CustomButton from "@/components/custom/CustomButton";
-import AddNewOfficeDialog from "./AddNewOfficeDialog";
-import {Plus} from "lucide-react";
+import React, { useState } from 'react';
+import CustomButton from '@/components/custom/CustomButton';
+import AddNewOfficeDialog from './AddNewOfficeDialog';
+import { Plus } from 'lucide-react';
 
 const OfficePageHeader = () => {
+  const [isAddOfficeDialogOpen, setIsAddOfficeDialogOpen] =
+    useState<boolean>(false);
 
-    const [isAddOfficeDialogOpen, setIsAddOfficeDialogOpen] = useState<boolean>(false);
+  return (
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <p className="text-[#101828] font-semibold text-lg">
+          Liste des bureaux
+        </p>
 
-    return (
-        <>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-                <p className="text-[#101828] font-semibold text-lg">
-                    Liste des bureaux
-                </p>
+        <CustomButton
+          onClick={() => setIsAddOfficeDialogOpen(true)}
+          className="sm:w-max w-full"
+          icon={<Plus className="flex-none size-5" />}
+        >
+          Ajouter un bureau
+        </CustomButton>
+      </div>
 
-                <CustomButton
-                    onClick={() => setIsAddOfficeDialogOpen(true)}
-                    className="sm:w-max w-full"
-                    icon={<Plus className="flex-none size-5"/>}
-                >
-                    Ajouter un bureau
-                </CustomButton>
-            </div>
-
-            <AddNewOfficeDialog
-                isOpen={isAddOfficeDialogOpen}
-                onClose={() => setIsAddOfficeDialogOpen(false)}
-            />
-        </>
-    );
+      <AddNewOfficeDialog
+        isOpen={isAddOfficeDialogOpen}
+        onClose={() => setIsAddOfficeDialogOpen(false)}
+      />
+    </>
+  );
 };
 
 export default OfficePageHeader;

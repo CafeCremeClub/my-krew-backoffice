@@ -1,4 +1,4 @@
 export enum UserAuthRole {
-    USER = 1,
-    ADMIN = 2,
+  USER = 1,
+  ADMIN = 2,
 }

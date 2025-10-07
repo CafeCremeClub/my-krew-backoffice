@@ -1,6 +1,6 @@
-import {AuthResponseUser} from "@/types/auth/AuthResponseUser";
+import { AuthResponseUser } from '@/types/auth/AuthResponseUser';
 
 export interface SigninResponse {
-    user: AuthResponseUser;
-    accessToken: string;
+  user: AuthResponseUser;
+  accessToken: string;
 }

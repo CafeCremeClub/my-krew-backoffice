@@ -1,4 +1,4 @@
 export interface UpdateUserDetailsPayload {
-    firstname?: string;
-    lastname?: string;
+  firstname?: string;
+  lastname?: string;
 }
