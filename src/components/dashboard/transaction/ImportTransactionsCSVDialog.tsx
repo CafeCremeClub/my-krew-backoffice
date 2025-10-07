@@ -30,11 +30,11 @@ interface CSVRowData extends TransactionData {
 // Validation schema using yup
 const transactionValidationSchema = yup.object().shape({
     email: yup.string().email('Email invalide').required('Email requis'),
-    gross: yup.number().min(0, 'Montant brut doit être positif').required('Montant brut requis'),
-    net: yup.number().min(0, 'Montant net doit être positif').required('Montant net requis'),
+    amount: yup.number().min(0, 'Montant doit être positif').required('Montant requis'),
     type: yup.string().oneOf(Object.values(TransactionType), `Type invalide (${Object.values(TransactionType).join(', ')})`).required('Type requis'),
     status: yup.string().oneOf(Object.values(TransactionStatus), `Statut invalide (${Object.values(TransactionStatus).join(', ')})`).required('Statut requis'),
-    date: yup.string().matches(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').required('Date requise')
+    date: yup.string().matches(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').required('Date requise'),
+    comment: yup.string().optional()
 });
 
 const validatePayload = (data: CSVRowData[]): { validData: TransactionData[], errors: string[] } => {
@@ -96,7 +96,7 @@ const ImportTransactionsCSVDialog = ({isOpen, onClose, page}: ImportTransactions
                 try {
                     // Expected headers
                     const expectedHeaders = [
-                        'email', 'gross', 'net', 'type', 'status', 'date'
+                        'email', 'amount', 'type', 'status', 'date'
                     ];
 
                     // Validate headers
@@ -124,11 +124,11 @@ const ImportTransactionsCSVDialog = ({isOpen, onClose, page}: ImportTransactions
                     // Add row index to data for validation error reporting
                     const dataWithRowIndex: CSVRowData[] = (results.data as CSVRowData[]).map((row, index) => ({
                         email: row.email || '',
-                        gross: parseFloat(row.gross.toString()) || 0,
-                        net: parseFloat(row.net.toString()) || 0,
+                        amount: parseFloat(row.amount.toString()) || 0,
                         type: row.type || '',
                         status: row.status || '',
                         date: row.date || '',
+                        comment: row.comment || undefined,
                         rowIndex: index + 2 // +2 because CSV row numbers start at 1 and we skip header
                     }));
 
@@ -270,21 +270,22 @@ const ImportTransactionsCSVDialog = ({isOpen, onClose, page}: ImportTransactions
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <h4 className="font-medium text-blue-900 mb-2">Format requis du fichier CSV:</h4>
                         <p className="text-sm text-blue-800 mb-2">
-                            Le fichier doit contenir les colonnes suivantes (dans cet ordre):
+                            Le fichier doit contenir les colonnes suivantes:
                         </p>
                         <div className="text-xs font-mono bg-white p-2 rounded border">
                             email,
-                            gross,
-                            net,
+                            amount,
                             type,
                             status,
-                            date
+                            date,
+                            comment (optionnel)
                         </div>
                         <p className="text-xs text-blue-700 mt-2">
                             • type: {Object.values(TransactionType).join(', ')}<br/>
                             • status: {Object.values(TransactionStatus).join(', ')}<br/>
                             • Dates au format: YYYY-MM-DD<br/>
-                            • gross/net: montants numériques (ex: 1500.50)
+                            • amount: montant numérique (ex: 1500.50)<br/>
+                            • comment: texte libre (optionnel)
                         </p>
                     </div>
 
@@ -317,7 +318,8 @@ const ImportTransactionsCSVDialog = ({isOpen, onClose, page}: ImportTransactions
                                 <div className="bg-white p-2 rounded border text-xs">
                                     {csvData.slice(0, 3).map((row, index) => (
                                         <div key={index} className="mb-1">
-                                            {row.email} - {row.gross}€ ({row.type}) - {row.status}
+                                            {row.email} - {row.amount}€ ({row.type}) - {row.status}
+                                            {row.comment && ` - ${row.comment}`}
                                         </div>
                                     ))}
                                     {csvData.length > 3 && (
