@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import CustomButton from '@/components/custom/CustomButton';
 import CustomInput from '@/components/custom/CustomInput';
 import CustomSelect from '@/components/custom/CustomSelect';
+import { Textarea } from '@/components/ui/textarea';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import CustomErrorIndicator from '@/components/custom/CustomErrorIndicator';
@@ -40,6 +41,10 @@ const validationSchema = Yup.object({
     .oneOf(Object.values(TransactionStatus), 'Statut invalide')
     .required('Statut requis'),
   date: Yup.date().required('Date requise'),
+  comment: Yup.string().max(
+    1000,
+    'Le commentaire ne peut pas dépasser 1000 caractères'
+  ),
 });
 
 const AddNewTransactionDialog = ({
@@ -58,6 +63,7 @@ const AddNewTransactionDialog = ({
       type: '' as TransactionType,
       status: TransactionStatus.PENDING,
       date: '',
+      comment: '',
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
@@ -68,6 +74,7 @@ const AddNewTransactionDialog = ({
           type: values.type,
           status: values.status,
           date: values.date,
+          comment: values.comment || undefined,
         });
 
         await queryClient.invalidateQueries({
@@ -194,6 +201,31 @@ const AddNewTransactionDialog = ({
               {formik.touched.date && formik.errors.date && (
                 <CustomErrorIndicator message={formik.errors.date} />
               )}
+            </div>
+
+            {/* Comment */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="comment">Commentaires (optionnel)</Label>
+              <Textarea
+                id="comment"
+                name="comment"
+                placeholder="Ajoutez un commentaire pour cette transaction..."
+                value={formik.values.comment}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className={`resize-none ${
+                  formik.touched.comment && formik.errors.comment
+                    ? 'border-red-500'
+                    : ''
+                }`}
+                rows={3}
+              />
+              {formik.touched.comment && formik.errors.comment && (
+                <CustomErrorIndicator message={formik.errors.comment} />
+              )}
+              <p className="text-xs text-gray-500">
+                {formik.values.comment.length}/1000 caractères
+              </p>
             </div>
 
             <DialogFooter>

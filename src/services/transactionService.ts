@@ -42,6 +42,7 @@ export const createTransaction = async (
         type: payload.type,
         status: payload.status,
         date: payload.date,
+        comment: payload.comment,
       }
     );
     return response.data;

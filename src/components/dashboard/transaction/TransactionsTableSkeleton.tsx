@@ -42,6 +42,9 @@ const TransactionsTableSkeleton = () => {
               <TableHead className="text-[#475467] text-xs min-w-32">
                 Date
               </TableHead>
+              <TableHead className="text-[#475467] text-xs min-w-40">
+                Commentaires
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -78,6 +81,10 @@ const TransactionsTableSkeleton = () => {
                 {/* Date */}
                 <TableCell>
                   <Skeleton className="h-4 w-20" />
+                </TableCell>
+                {/* Commentaires */}
+                <TableCell>
+                  <Skeleton className="h-4 w-32" />
                 </TableCell>
               </TableRow>
             ))}

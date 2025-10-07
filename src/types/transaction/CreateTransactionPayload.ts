@@ -7,4 +7,5 @@ export interface CreateTransactionPayload {
   type: TransactionType;
   status: TransactionStatus;
   date: string;
+  comment?: string;
 }

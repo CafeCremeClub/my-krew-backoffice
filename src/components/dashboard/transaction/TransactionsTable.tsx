@@ -171,6 +171,9 @@ const TransactionsTable = () => {
                     <TableHead className="text-[#475467] text-xs min-w-32">
                       Date
                     </TableHead>
+                    <TableHead className="text-[#475467] text-xs min-w-40">
+                      Commentaires
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -264,6 +267,11 @@ const TransactionsTable = () => {
                         </TableCell>
                         <TableCell className="text-sm text-[#475467]">
                           {formatDateToFR(transaction.date)}
+                        </TableCell>
+                        <TableCell className="text-sm text-[#475467] max-w-xs">
+                          <div className="whitespace-pre-wrap break-words">
+                            {transaction.comment || '-'}
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

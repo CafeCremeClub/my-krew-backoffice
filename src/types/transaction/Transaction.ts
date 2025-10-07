@@ -15,4 +15,5 @@ export interface Transaction {
   type: TransactionType;
   status: TransactionStatus;
   date: string;
+  comment?: string;
 }

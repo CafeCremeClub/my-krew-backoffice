@@ -32,7 +32,6 @@ interface CSVRowData extends TransactionData {
   rowIndex: number;
 }
 
-// Validation schema using yup
 const transactionValidationSchema = yup.object().shape({
   email: yup.string().email('Email invalide').required('Email requis'),
   amount: yup
@@ -68,7 +67,6 @@ const validatePayload = (
 
   data.forEach((row) => {
     try {
-      // Remove rowIndex for validation
       const { ...transactionData } = row;
       transactionValidationSchema.validateSync(transactionData, {
         abortEarly: false,
@@ -125,10 +123,8 @@ const ImportTransactionsCSVDialog = ({
       transform: (value: string) => value.trim(),
       complete: (results) => {
         try {
-          // Expected headers
           const expectedHeaders = ['email', 'amount', 'type', 'status', 'date'];
 
-          // Validate headers
           const actualHeaders = results.meta.fields || [];
           const missingHeaders = expectedHeaders.filter(
             (header) => !actualHeaders.includes(header)
@@ -140,7 +136,6 @@ const ImportTransactionsCSVDialog = ({
             return;
           }
 
-          // Check for parsing errors
           if (results.errors.length > 0) {
             const parseErrors = results.errors.map(
               (error) =>
@@ -153,7 +148,6 @@ const ImportTransactionsCSVDialog = ({
             return;
           }
 
-          // Add row index to data for validation error reporting
           const dataWithRowIndex: CSVRowData[] = (
             results.data as CSVRowData[]
           ).map((row, index) => ({
@@ -163,10 +157,9 @@ const ImportTransactionsCSVDialog = ({
             status: row.status || '',
             date: row.date || '',
             comment: row.comment || undefined,
-            rowIndex: index + 2, // +2 because CSV row numbers start at 1 and we skip header
+            rowIndex: index + 2,
           }));
 
-          // Validate data using yup
           const { validData, errors: validationErrors } =
             validatePayload(dataWithRowIndex);
 
@@ -199,7 +192,6 @@ const ImportTransactionsCSVDialog = ({
     try {
       await createCSVTransactions(payload);
 
-      // Update the cache with the new transactions
       await queryClient.invalidateQueries({
         queryKey: [
           'get-transactions',
@@ -331,7 +323,7 @@ const ImportTransactionsCSVDialog = ({
               • Dates au format: YYYY-MM-DD
               <br />
               • amount: montant numérique (ex: 1500.50)
-              <br />• comment: texte libre (optionnel)
+              <br />• comment: commentaires/notes (optionnel, texte libre)
             </p>
           </div>
 
