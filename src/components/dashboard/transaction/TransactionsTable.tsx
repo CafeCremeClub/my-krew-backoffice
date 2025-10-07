@@ -17,9 +17,14 @@ import { formatDateToFR } from '@/utils/helpers/formatDateToFR';
 import TransactionsTablePaginationControls from '@/components/dashboard/transaction/TransactionsTablePaginationControls';
 import TransactionsTableSkeleton from '@/components/dashboard/transaction/TransactionsTableSkeleton';
 import { Transaction } from '@/types/transaction/Transaction';
+import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
+import EditTransactionDialog from '@/components/dashboard/transaction/EditTransactionDialog';
 
 const TransactionsTable = () => {
   const [page, setPage] = useState<number>(1);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
 
   const {
     isPending,
@@ -174,6 +179,9 @@ const TransactionsTable = () => {
                     <TableHead className="text-[#475467] text-xs min-w-40">
                       Commentaires
                     </TableHead>
+                    <TableHead className="text-[#475467] text-xs min-w-20">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -273,6 +281,17 @@ const TransactionsTable = () => {
                             {transaction.comment || '-'}
                           </div>
                         </TableCell>
+                        <TableCell className="text-sm">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-gray-100"
+                            onClick={() => setEditingTransaction(transaction)}
+                            disabled={deletedConsultant}
+                          >
+                            <Pencil className="h-4 w-4 text-gray-600" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -298,6 +317,14 @@ const TransactionsTable = () => {
           </div>
         )}
       </div>
+
+      {editingTransaction && (
+        <EditTransactionDialog
+          isOpen={!!editingTransaction}
+          onClose={() => setEditingTransaction(null)}
+          transaction={editingTransaction}
+        />
+      )}
     </>
   );
 };

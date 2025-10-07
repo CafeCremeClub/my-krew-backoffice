@@ -35,28 +35,23 @@ const ConsultantsTablePaginationControls = ({
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if total pages is less than max visible
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Show pages with ellipsis
       if (currentPage <= 3) {
-        // Show first few pages
         for (let i = 1; i <= 4; i++) {
           pages.push(i);
         }
         pages.push('...');
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
-        // Show last few pages
         pages.push(1);
         pages.push('...');
         for (let i = totalPages - 3; i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
-        // Show pages around current page
         pages.push(1);
         pages.push('...');
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
@@ -70,7 +65,6 @@ const ConsultantsTablePaginationControls = ({
     return pages;
   };
 
-  // Don't render pagination if there's only one page or no data
   if (totalPages <= 1) {
     return null;
   }

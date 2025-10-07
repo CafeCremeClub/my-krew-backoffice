@@ -34,7 +34,6 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       <SelectTrigger
         className={cn(
           'cursor-pointer shadow-md shadow-[#E4E5E73D] !h-[2.5rem] px-3 bg-white rounded-[0.625rem] text-[#0A0D14] text-sm focus:outline-none focus:!ring-0 placeholder:text-[#868C98] placeholder:text-sm',
-          // Border styles, change if error
           isError
             ? 'border border-[#DF1C41] focus:border-[#DF1C41]'
             : 'border border-[#E2E4E9] focus:border focus:!border-gray-400',

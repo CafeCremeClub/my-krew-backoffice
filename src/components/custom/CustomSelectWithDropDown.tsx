@@ -53,37 +53,29 @@ const CustomSelectWithDropDown = <T = unknown,>({
     setSearchQuery('');
   };
 
-  // Handle search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
 
-    // Call the onSearch callback if provided (for dynamic search)
     if (onSearch && query.length >= 0) {
-      // Can be changed to 3 if needed
       onSearch(query);
     }
   };
 
-  // Find the selected item to display its label
   const selectedItem = items.find((item) => {
     if (onSearch) {
-      // For dynamic search (like city search), match by extracting the base value
       const itemBaseValue =
         typeof item.value === 'string' && item.value.includes('__')
           ? item.value.split('__')[0]
           : item.value;
       return itemBaseValue === value;
     } else {
-      // For static items, direct match
       return item.value === value;
     }
   });
 
-  // Get the value to use in the Select component
   const selectValue = selectedItem ? (selectedItem.value as string) : '';
 
-  // For display purposes, show the selected value even if no matching item is found
   const displayValue = selectedItem
     ? selectedItem.label
     : value && onSearch
@@ -132,15 +124,12 @@ const CustomSelectWithDropDown = <T = unknown,>({
                 className="h-8 text-sm"
                 autoFocus
                 onKeyDown={(e) => {
-                  // Prevent the Select from closing when typing in search
                   e.stopPropagation();
                 }}
                 onFocus={(e) => {
-                  // Prevent the Select from handling focus events from search input
                   e.stopPropagation();
                 }}
                 onBlur={(e) => {
-                  // Prevent the Select from handling blur events from search input
                   e.stopPropagation();
                 }}
               />

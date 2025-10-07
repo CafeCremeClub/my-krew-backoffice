@@ -26,7 +26,6 @@ const SignInForm = () => {
   const router = useRouter();
   const [step, setStep] = useState<'email' | 'otp'>('email');
 
-  // Validation schema using Yup
   const validationSchema = Yup.object({
     email: Yup.string()
       .email('Adresse email invalide')
@@ -36,7 +35,6 @@ const SignInForm = () => {
       .matches(/^\d+$/, 'Le code OTP ne doit contenir que des chiffres'),
   });
 
-  // Formik hook
   const formik = useFormik({
     initialValues: {
       email: '',

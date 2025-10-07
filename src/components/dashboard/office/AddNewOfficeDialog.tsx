@@ -22,7 +22,6 @@ interface AddNewOfficeDialogProps {
   onClose: () => void;
 }
 
-// Validation schema using Yup
 const validationSchema = Yup.object({
   name: Yup.string()
     .min(2, 'Le nom doit contenir au moins 2 caractères')

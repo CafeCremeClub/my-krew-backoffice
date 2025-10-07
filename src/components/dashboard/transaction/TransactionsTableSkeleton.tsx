@@ -45,6 +45,9 @@ const TransactionsTableSkeleton = () => {
               <TableHead className="text-[#475467] text-xs min-w-40">
                 Commentaires
               </TableHead>
+              <TableHead className="text-[#475467] text-xs min-w-20">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -85,6 +88,10 @@ const TransactionsTableSkeleton = () => {
                 {/* Commentaires */}
                 <TableCell>
                   <Skeleton className="h-4 w-32" />
+                </TableCell>
+                {/* Actions */}
+                <TableCell>
+                  <Skeleton className="h-8 w-8 rounded" />
                 </TableCell>
               </TableRow>
             ))}

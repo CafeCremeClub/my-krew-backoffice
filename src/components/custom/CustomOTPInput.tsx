@@ -21,7 +21,6 @@ const CustomOtpInput = ({
     const slots = [];
     const halfLength = Math.ceil(maxLength / 2);
 
-    // First group
     slots.push(
       <InputOTPGroup key="group-1">
         {Array.from({ length: halfLength }, (_, index) => (
@@ -30,11 +29,9 @@ const CustomOtpInput = ({
       </InputOTPGroup>
     );
 
-    // Add separator if we have more than one group
     if (maxLength > halfLength) {
       slots.push(<InputOTPSeparator key="separator" />);
 
-      // Second group
       slots.push(
         <InputOTPGroup key="group-2">
           {Array.from({ length: maxLength - halfLength }, (_, index) => (
