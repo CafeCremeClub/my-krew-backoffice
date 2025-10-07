@@ -10,7 +10,6 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TransactionsTableSkeleton = () => {
-  // Create skeleton rows - typically 5-10 rows for a good skeleton effect
   const skeletonRows = Array.from({ length: 8 }, (_, index) => index);
 
   return (
@@ -38,10 +37,7 @@ const TransactionsTableSkeleton = () => {
                 Statut consultant
               </TableHead>
               <TableHead className="text-[#475467] text-xs min-w-28">
-                Montant brut
-              </TableHead>
-              <TableHead className="text-[#475467] text-xs min-w-28">
-                Montant net
+                Montant
               </TableHead>
               <TableHead className="text-[#475467] text-xs min-w-32">
                 Date
@@ -75,11 +71,7 @@ const TransactionsTableSkeleton = () => {
                 <TableCell>
                   <Skeleton className="h-6 w-16 rounded-full" />
                 </TableCell>
-                {/* Montant brut */}
-                <TableCell>
-                  <Skeleton className="h-4 w-20" />
-                </TableCell>
-                {/* Montant net */}
+                {/* Montant */}
                 <TableCell>
                   <Skeleton className="h-4 w-20" />
                 </TableCell>

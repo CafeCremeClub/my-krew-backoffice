@@ -29,14 +29,10 @@ interface AddNewTransactionDialogProps {
   page?: number;
 }
 
-// Validation schema using Yup
 const validationSchema = Yup.object({
-  gross: Yup.number()
-    .positive('Le montant brut doit être positif')
-    .required('Montant brut requis'),
-  net: Yup.number()
-    .positive('Le montant net doit être positif')
-    .required('Montant net requis'),
+  amount: Yup.number()
+    .positive('Le montant doit être positif')
+    .required('Montant requis'),
   type: Yup.string()
     .oneOf(Object.values(TransactionType), 'Type de transaction invalide')
     .required('Type de transaction requis'),
@@ -58,8 +54,7 @@ const AddNewTransactionDialog = ({
 
   const formik = useFormik({
     initialValues: {
-      gross: '',
-      net: '',
+      amount: '',
       type: '' as TransactionType,
       status: TransactionStatus.PENDING,
       date: '',
@@ -69,8 +64,7 @@ const AddNewTransactionDialog = ({
       try {
         await mutateAsync({
           consultantId: consultant.id,
-          gross: parseFloat(values.gross),
-          net: parseFloat(values.net),
+          amount: parseFloat(values.amount),
           type: values.type,
           status: values.status,
           date: values.date,
@@ -108,14 +102,12 @@ const AddNewTransactionDialog = ({
     },
   });
 
-  // Transaction type options
   const transactionTypeOptions = [
     { label: 'Salaire', value: TransactionType.SALARY },
     { label: 'Participation', value: TransactionType.PARTICIPATION },
     { label: 'Parrainage', value: TransactionType.REFERRAL },
   ];
 
-  // Transaction status options
   const transactionStatusOptions = [
     { label: 'Payée', value: TransactionStatus.PAYED },
     { label: 'En attente', value: TransactionStatus.PENDING },
@@ -136,41 +128,22 @@ const AddNewTransactionDialog = ({
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={formik.handleSubmit} className="space-y-6">
-            {/* Gross Amount */}
+            {/* Amount */}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="gross">Montant brut (€)</Label>
+              <Label htmlFor="amount">Montant (€)</Label>
               <CustomInput
-                id="gross"
-                name="gross"
+                id="amount"
+                name="amount"
                 type="number"
                 step="0.01"
                 placeholder="1000.00"
-                value={formik.values.gross}
+                value={formik.values.amount}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                isError={formik.touched.gross && !!formik.errors.gross}
+                isError={formik.touched.amount && !!formik.errors.amount}
               />
-              {formik.touched.gross && formik.errors.gross && (
-                <CustomErrorIndicator message={formik.errors.gross} />
-              )}
-            </div>
-
-            {/* Net Amount */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="net">Montant net (€)</Label>
-              <CustomInput
-                id="net"
-                name="net"
-                type="number"
-                step="0.01"
-                placeholder="800.00"
-                value={formik.values.net}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                isError={formik.touched.net && !!formik.errors.net}
-              />
-              {formik.touched.net && formik.errors.net && (
-                <CustomErrorIndicator message={formik.errors.net} />
+              {formik.touched.amount && formik.errors.amount && (
+                <CustomErrorIndicator message={formik.errors.amount} />
               )}
             </div>
 

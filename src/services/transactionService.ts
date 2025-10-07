@@ -38,8 +38,7 @@ export const createTransaction = async (
     const response = await axiosInstance.post<Transaction>(
       `/transactions/${payload.consultantId}`,
       {
-        gross: payload.gross,
-        net: payload.net,
+        amount: payload.amount,
         type: payload.type,
         status: payload.status,
         date: payload.date,

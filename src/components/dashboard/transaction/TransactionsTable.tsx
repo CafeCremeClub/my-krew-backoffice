@@ -166,10 +166,7 @@ const TransactionsTable = () => {
                       Statut consultant
                     </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-28">
-                      Montant brut
-                    </TableHead>
-                    <TableHead className="text-[#475467] text-xs min-w-28">
-                      Montant net
+                      Montant
                     </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-32">
                       Date
@@ -263,10 +260,7 @@ const TransactionsTable = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-sm text-[#475467]">
-                          {formatCurrency(transaction.gross)}
-                        </TableCell>
-                        <TableCell className="text-sm text-[#475467]">
-                          {formatCurrency(transaction.net)}
+                          {formatCurrency(transaction.amount)}
                         </TableCell>
                         <TableCell className="text-sm text-[#475467]">
                           {formatDateToFR(transaction.date)}

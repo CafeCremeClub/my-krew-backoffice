@@ -11,8 +11,7 @@ export interface Transaction {
   phone: string;
   consultantStatus: ConsultantStatus;
   consultantType: ConsultantType;
-  gross: string;
-  net: string;
+  amount: string;
   type: TransactionType;
   status: TransactionStatus;
   date: string;
