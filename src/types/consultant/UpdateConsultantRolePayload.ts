@@ -1,7 +1,6 @@
-import {ConsultantRole} from "@/types/consultant/ConsultantRole";
-
+import { ConsultantRole } from '@/types/consultant/ConsultantRole';
 
 export interface UpdateConsultantRolePayload {
-    id: string;
-    role: ConsultantRole;
+  id: string;
+  role: ConsultantRole;
 }

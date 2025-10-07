@@ -1,1 +1,1 @@
-export type ReferralStatus = "active" | "inactive";
+export type ReferralStatus = 'active' | 'inactive';

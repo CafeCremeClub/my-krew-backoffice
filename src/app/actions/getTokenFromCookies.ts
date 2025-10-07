@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import {cookies} from 'next/headers';
+import { cookies } from 'next/headers';
 
 export async function getTokenFromCookies(): Promise<string | undefined> {
-    const cookieStore = await cookies();
-    return cookieStore.get('token')?.value;
+  const cookieStore = await cookies();
+  return cookieStore.get('token')?.value;
 }

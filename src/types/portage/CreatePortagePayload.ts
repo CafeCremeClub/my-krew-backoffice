@@ -1,4 +1,3 @@
 export interface CreatePortagePayload {
-    name: string;
+  name: string;
 }
-

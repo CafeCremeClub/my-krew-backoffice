@@ -1,3 +1,1 @@
-
-
-export type ConsultantStatus = "active" | "inactive";
+export type ConsultantStatus = 'active' | 'inactive';

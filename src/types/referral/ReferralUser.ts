@@ -1,7 +1,7 @@
 export interface ReferralUser {
-    id: string;
-    firstname: string;
-    lastname: string;
-    email: string;
-    phone: string;
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone: string;
 }
