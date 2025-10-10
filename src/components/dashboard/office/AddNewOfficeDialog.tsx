@@ -50,8 +50,8 @@ const AddNewOfficeDialog = ({ isOpen, onClose }: AddNewOfficeDialogProps) => {
           exact: true,
         });
 
-        toast.success('Bureau créé', {
-          description: 'Le bureau a été créé avec succès.',
+        toast.success('LLP créé', {
+          description: 'Le LLP a été créé avec succès.',
           position: 'bottom-right',
           className: '!bg-[#CBF5E5] !text-[#176448] !border !border-[#CBF5E5]',
           descriptionClassName: '!text-[#176448] !text-sm',
@@ -61,8 +61,8 @@ const AddNewOfficeDialog = ({ isOpen, onClose }: AddNewOfficeDialogProps) => {
         onClose();
       } catch (error) {
         console.log(error);
-        toast.error('Échec de la création du bureau', {
-          description: 'Une erreur est survenue lors de la création du bureau.',
+        toast.error('Échec de la création du LLP', {
+          description: 'Une erreur est survenue lors de la création du LLP.',
           position: 'bottom-right',
           className: '!bg-[#DF1C41] !text-white',
           descriptionClassName: '!text-white !text-xs',
@@ -76,9 +76,9 @@ const AddNewOfficeDialog = ({ isOpen, onClose }: AddNewOfficeDialogProps) => {
       <DialogContent className="sm:max-w-xl p-1 rounded-[1.25rem] px-2 max-h-[95vh] overflow-y-auto hidden-scrollbar">
         <div className="bg-white rounded-2xl overflow-hidden flex flex-col gap-10 py-6 px-2">
           <DialogHeader>
-            <DialogTitle>Ajouter un nouveau bureau</DialogTitle>
+            <DialogTitle>Ajouter un nouveau LLP</DialogTitle>
             <DialogDescription>
-              Remplissez les informations pour créer un nouveau bureau.
+              Remplissez les informations pour créer un nouveau LLP.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={formik.handleSubmit} className="space-y-6">
@@ -89,7 +89,7 @@ const AddNewOfficeDialog = ({ isOpen, onClose }: AddNewOfficeDialogProps) => {
                 id="name"
                 name="name"
                 type="text"
-                placeholder="Entrez le nom du bureau"
+                placeholder="Entrez le nom du LLP"
                 value={formik.values.name}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}

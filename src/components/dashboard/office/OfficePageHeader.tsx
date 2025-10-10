@@ -12,16 +12,14 @@ const OfficePageHeader = () => {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-[#101828] font-semibold text-lg">
-          Liste des bureaux
-        </p>
+        <p className="text-[#101828] font-semibold text-lg">Liste des LLPs</p>
 
         <CustomButton
           onClick={() => setIsAddOfficeDialogOpen(true)}
           className="sm:w-max w-full"
           icon={<Plus className="flex-none size-5" />}
         >
-          Ajouter un bureau
+          Ajouter un LLP
         </CustomButton>
       </div>
 

@@ -98,9 +98,18 @@ const ConsultantDetailsPage = () => {
   };
 
   const getTypeBadge = (type: string) => {
+    let label = type;
+    if (type === 'UK') {
+      label = 'UK';
+    } else if (type === 'FR') {
+      label = 'FR';
+    } else if (type === 'entrepreneur') {
+      label = 'Entrepreneur';
+    }
+
     return (
       <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
-        {type === 'balkani' ? 'Balkani' : 'Entrepreneur'}
+        {label}
       </span>
     );
   };
@@ -275,9 +284,7 @@ const ConsultantDetailsPage = () => {
             </h2>
             <div className="space-y-4">
               <div className="flex justify-between items-start">
-                <span className="text-sm text-[#475467] font-medium">
-                  Bureau
-                </span>
+                <span className="text-sm text-[#475467] font-medium">LLP</span>
                 <span className="text-sm text-[#101828] text-right">
                   {consultant.office}
                 </span>
@@ -311,10 +318,10 @@ const ConsultantDetailsPage = () => {
             </div>
           </div>
 
-          {/* Card 3: Performance et estimations */}
+          {/* Card 3: Taux de rendement et estimations */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 lg:col-span-2">
             <h2 className="text-lg font-semibold text-[#101828] mb-4">
-              Performance et estimations
+              Taux de rendement et estimations
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
@@ -327,7 +334,7 @@ const ConsultantDetailsPage = () => {
               </div>
               <div className="space-y-2">
                 <span className="text-sm text-[#475467] font-medium">
-                  Performance
+                  Taux de rendement
                 </span>
                 <p className="text-2xl font-bold text-[#101828]">
                   {formatPerformance(consultant.performance)}

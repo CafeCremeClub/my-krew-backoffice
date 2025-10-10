@@ -59,7 +59,7 @@ const validationSchema = Yup.object({
       'La date de fin doit être postérieure à la date de début'
     ),
   portageId: Yup.string().required('Société de portage requise'),
-  officeId: Yup.string().required('Bureau requis'),
+  officeId: Yup.string().required('LLP requis'),
 });
 
 const AddNewConsultantDialog = ({
@@ -311,8 +311,12 @@ const AddNewConsultantDialog = ({
                 placeholder="Sélectionnez une société de portage"
                 options={[
                   {
-                    label: 'Balkani',
-                    value: ConsultantType.BALKANI,
+                    label: 'UK',
+                    value: ConsultantType.UK,
+                  },
+                  {
+                    label: 'FR',
+                    value: ConsultantType.FR,
                   },
                   {
                     label: 'Entrepreneur',
@@ -385,14 +389,14 @@ const AddNewConsultantDialog = ({
 
             {/* Office Select */}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="officeId">Bureau</Label>
+              <Label htmlFor="officeId">LLP</Label>
               {isOfficesPending ? (
                 <Skeleton className="h-[2.5rem] w-full rounded-[0.625rem]" />
               ) : (
                 <CustomSelect
                   value={formik.values.officeId}
                   onChange={(value) => formik.setFieldValue('officeId', value)}
-                  placeholder="Sélectionnez un bureau"
+                  placeholder="Sélectionnez un LLP"
                   options={officeOptions}
                   className="w-full"
                   isError={formik.touched.officeId && !!formik.errors.officeId}

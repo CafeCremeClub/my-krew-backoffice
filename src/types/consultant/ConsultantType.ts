@@ -1,4 +1,5 @@
 export enum ConsultantType {
-  BALKANI = 'balkani',
+  UK = 'UK',
+  FR = 'FR',
   ENTREPRENEUR = 'entrepreneur',
 }

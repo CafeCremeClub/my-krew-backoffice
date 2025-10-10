@@ -36,7 +36,7 @@ const OfficesTable = () => {
         <OfficesTableSkeleton />
       ) : isError ? (
         <div className="flex justify-center items-center text-center text-red-500 text-sm h-full">
-          Une erreur est survenue lors du chargement des bureaux.
+          Une erreur est survenue lors du chargement des LLPs.
         </div>
       ) : offices && offices.length > 0 ? (
         <div className="overflow-x-auto">
@@ -84,10 +84,10 @@ const OfficesTable = () => {
       ) : (
         <div className="h-full flex flex-col justify-center items-center gap-0.5">
           <p className="font-semibold text-center text-2xl text-[#101828]">
-            Pas encore de bureaux
+            Pas encore de LLPs
           </p>
           <p className="text-center text-sm text-[#525866] font-medium">
-            Aucun bureau n&apos;a encore été ajouté
+            Aucun LLP n&apos;a encore été ajouté
           </p>
         </div>
       )}
