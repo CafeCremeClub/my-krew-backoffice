@@ -149,7 +149,7 @@ const ConsultantsTable = ({
                       Date de fin
                     </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-32">
-                      Bureau
+                      LLP
                     </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-40">
                       Société de portage
@@ -161,7 +161,7 @@ const ConsultantsTable = ({
                       Estimation mensuelle
                     </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-28">
-                      Performance
+                      Taux de rendement
                     </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-28">
                       Actions

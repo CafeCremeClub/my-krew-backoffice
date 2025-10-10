@@ -34,7 +34,7 @@ const ConsultantsTableSkeleton = () => {
                 Date de fin
               </TableHead>
               <TableHead className="text-[#475467] text-xs min-w-32">
-                Bureau
+                LLP
               </TableHead>
               <TableHead className="text-[#475467] text-xs min-w-40">
                 Société de portage
@@ -46,7 +46,7 @@ const ConsultantsTableSkeleton = () => {
                 Estimation mensuelle
               </TableHead>
               <TableHead className="text-[#475467] text-xs min-w-28">
-                Performance
+                Taux de rendement
               </TableHead>
               <TableHead className="text-[#475467] text-xs min-w-28">
                 Actions
@@ -76,7 +76,7 @@ const ConsultantsTableSkeleton = () => {
                 <TableCell>
                   <Skeleton className="h-4 w-20" />
                 </TableCell>
-                {/* Bureau */}
+                {/* LLP */}
                 <TableCell>
                   <Skeleton className="h-4 w-24" />
                 </TableCell>
@@ -92,7 +92,7 @@ const ConsultantsTableSkeleton = () => {
                 <TableCell>
                   <Skeleton className="h-4 w-16" />
                 </TableCell>
-                {/* Performance */}
+                {/* Taux de rendement */}
                 <TableCell>
                   <Skeleton className="h-4 w-8" />
                 </TableCell>

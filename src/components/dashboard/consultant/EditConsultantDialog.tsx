@@ -44,7 +44,7 @@ const EditConsultantDialog = ({
       monthlyEstimation: consultant.monthlyEstimation || 0,
       performance: consultant.performance || 0,
       status: consultant.status || 'active',
-      type: consultant.type || ConsultantType.BALKANI,
+      type: consultant.type || ConsultantType.UK,
       startDate: consultant.startDate ? consultant.startDate.split('T')[0] : '',
       endDate: consultant.endDate ? consultant.endDate.split('T')[0] : '',
     },
@@ -54,8 +54,8 @@ const EditConsultantDialog = ({
         .min(0, "L'estimation doit être positive")
         .required('Estimation mensuelle requise'),
       performance: Yup.number()
-        .min(0, 'La performance doit être positive')
-        .required('Performance requise'),
+        .min(0, 'Le taux de rendement doit être positif')
+        .required('Taux de rendement requis'),
       status: Yup.string().required('Statut requis'),
       type: Yup.string().required('Type requis'),
       startDate: Yup.date().required('Date de début requise'),
@@ -181,9 +181,9 @@ const EditConsultantDialog = ({
                     )}
                 </div>
 
-                {/* Performance */}
+                {/* Taux de rendement */}
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="performance">Performance</Label>
+                  <Label htmlFor="performance">Taux de rendement</Label>
                   <CustomInput
                     id="performance"
                     name="performance"
@@ -228,7 +228,8 @@ const EditConsultantDialog = ({
                     onChange={(value) => formik.setFieldValue('type', value)}
                     placeholder="Sélectionnez un type"
                     options={[
-                      { label: 'Balkani', value: ConsultantType.BALKANI },
+                      { label: 'UK', value: ConsultantType.UK },
+                      { label: 'FR', value: ConsultantType.FR },
                       {
                         label: 'Entrepreneur',
                         value: ConsultantType.ENTREPRENEUR,

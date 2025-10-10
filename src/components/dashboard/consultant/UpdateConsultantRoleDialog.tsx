@@ -88,7 +88,7 @@ const UpdateConsultantRoleDialog = ({
               <CustomSelect
                 value={formik.values.role}
                 onChange={(value) => formik.setFieldValue('role', value)}
-                placeholder="Sélectionnez un bureau"
+                placeholder="Sélectionnez un LLP"
                 options={[
                   {
                     label: 'Ambassadeur',

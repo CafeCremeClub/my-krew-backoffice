@@ -62,7 +62,7 @@ const userValidationSchema = yup.object().shape({
     .nullable()
     .matches(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)'),
   portageId: yup.string().required('ID portage requis'),
-  officeId: yup.string().required('ID bureau requis'),
+  officeId: yup.string().required('ID LLP requis'),
 });
 
 const validatePayload = (
@@ -217,7 +217,7 @@ const ImportConsultantsCSVDialog = ({
               !officesData?.find((office) => office.id === row.officeId)
             ) {
               dataValidationErrors.push(
-                `Ligne ${rowNumber}: ID bureau "${row.officeId}" introuvable. Vérifiez que cet ID existe dans les données.`
+                `Ligne ${rowNumber}: ID LLP "${row.officeId}" introuvable. Vérifiez que cet ID existe dans les données.`
               );
             }
           });
