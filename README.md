@@ -1,36 +1,179 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MyKrew App — Back Office
 
-## Getting Started
+Interface d'administration web de la plateforme **MyKrew**. Permet aux administrateurs internes
+de gérer les consultants, leurs transactions, les sociétés de portage, les LLP et les cooptations.
 
-First, run the development server:
+> Outil interne — fait partie de l'écosystème MyKrew / MyHub (automations n8n, crons, warehouse).
+> Documentation technique détaillée : voir [`CLAUDE.md`](./CLAUDE.md).
+
+---
+
+## Overview
+
+- **Quoi** : back-office d'administration (CRUD + import CSV) pour la plateforme MyKrew.
+- **Pour qui** : administrateurs internes uniquement (rôle `ADMIN`).
+- **Architecture** : application **frontend-only** Next.js 15 (App Router) consommant une **API
+  REST externe**. Pas de backend ni de base de données dans ce repository.
+- **Auth** : connexion par **email + code OTP** ; token JWT stocké en cookie HTTP-only.
+
+---
+
+## Quick Start
+
+> Objectif : démarrage en moins de 10 minutes.
+
+**Prérequis** : Node.js ≥ 18.18 (Node 20+ recommandé), npm.
 
 ```bash
+# 1. Installer les dépendances
+npm install
+
+# 2. Configurer l'environnement
+#    Créer un fichier .env.local à la racine :
+echo "NEXT_PUBLIC_BASE_URL=https://<url-de-votre-api>" > .env.local
+
+# 3. Lancer le serveur de développement
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir [http://localhost:3000](http://localhost:3000) → redirige vers `/dashboard`, puis vers
+`/auth/signin` si non connecté.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Scripts disponibles :**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script | Commande | Description |
+|---|---|---|
+| `npm run dev` | `next dev --turbopack` | Serveur de développement |
+| `npm run build` | `next build --turbopack` | Build de production |
+| `npm run start` | `next start` | Lance le build de production |
+| `npm run lint` | `eslint` | Lint du code |
 
-## Learn More
+> ℹ️ Aucun script de test n'est défini (pas de framework de test dans le repo).
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture Overview
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Application frontend-only. Le flux de données suit toujours le même pattern par domaine :
 
-## Deploy on Vercel
+```
+Page / Composant (client)
+  └─ Hook React Query (src/hooks/**)        → cache, loading / error
+       └─ Service (src/services/**)          → fonction async typée
+            └─ axiosInstance (src/config)     → injecte Bearer token (cookie)
+                 └─ API REST externe (NEXT_PUBLIC_BASE_URL)
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Auth & routing** : `src/middleware.ts` protège les routes selon la présence du cookie `token`
+  (`/` → `/dashboard`, routes privées sans token → `/auth/signin`).
+- **Token** : géré via des Server Actions Next.js (`src/app/actions/`) en cookie HTTP-only.
+- **State serveur** : TanStack React Query (cache, mutations, devtools).
+- **UI** : Tailwind CSS 4 + shadcn/ui (style « new-york ») + primitives Radix.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Stack** : Next.js 15.5 · React 19 · TypeScript 5 · React Query 5 · axios · Formik + Yup ·
+Tailwind 4 · shadcn/ui · sonner · papaparse.
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/                 # App Router : routes, layouts, Server Actions
+│   ├── actions/         # Gestion du cookie token ('use server')
+│   ├── auth/signin/     # Connexion email + OTP
+│   ├── dashboard/       # Section protégée (consultants, transactions, portage, office, referrals)
+│   └── layout.tsx       # Root layout (fonts, providers, toaster)
+├── components/
+│   ├── ui/              # Primitives shadcn/ui
+│   ├── custom/          # Composants maison réutilisables
+│   └── dashboard/<domaine>/  # Composants par domaine métier
+├── hooks/<domaine>/     # Hooks React Query (useQuery / useMutation)
+├── services/            # Appels API axios, un fichier par domaine
+├── types/<domaine>/     # Interfaces & enums TypeScript
+├── config/axiosInstance.ts   # Instance axios + intercepteur Bearer
+├── context/             # ReactQueryProvider
+├── lib/utils.ts         # cn() — merge classes Tailwind
+├── utils/               # routes (sidebar) + helpers (dates, erreurs)
+└── middleware.ts        # Garde d'authentification
+```
+
+> Alias d'import : `@/*` → `./src/*`. Pattern répété par domaine :
+> `types` → `services` → `hooks` → `components/dashboard`.
+
+---
+
+## Environment Variables
+
+| Variable | Obligatoire | Rôle |
+|---|---|---|
+| `NEXT_PUBLIC_BASE_URL` | ✅ | URL de base de l'API REST externe (axios) |
+
+- Seule variable utilisée dans le code ([`src/config/axiosInstance.ts`](./src/config/axiosInstance.ts)).
+- Préfixe `NEXT_PUBLIC_` ⇒ **inlinée dans le bundle client** : n'y mettre **aucun secret**.
+- Les fichiers `.env*` sont gitignorés. À placer dans `.env.local` en développement.
+
+---
+
+## Key Features / Modules
+
+| Module | Route | Fonctionnalités |
+|---|---|---|
+| **Auth** | `/auth/signin` | Connexion email + OTP, contrôle du rôle `ADMIN` |
+| **Consultants** | `/dashboard`, `/dashboard/consultants/[id]` | Liste paginée + recherche, création, édition, suppression, changement de rôle, import CSV |
+| **Transactions** | `/dashboard/transactions` | Liste, création, édition, import CSV |
+| **Portage** | `/dashboard/portage` | Liste & création de sociétés de portage |
+| **LLP** | `/dashboard/office` | Liste & création de LLP (ex-« Bureaux ») |
+| **Cooptation** | `/dashboard/referrals` | Liste & création de cooptations (referrals) |
+
+---
+
+## External Dependencies
+
+- **API REST MyKrew** (obligatoire) — toute la donnée et la logique métier. Base URL via
+  `NEXT_PUBLIC_BASE_URL`. Endpoints consommés détaillés dans [`CLAUDE.md`](./CLAUDE.md#8-dépendances-externes).
+- **Authentification** — JWT en cookie HTTP-only (`secure`, `sameSite: 'none'`), posé via Server
+  Actions. Pas de provider d'auth tiers.
+
+---
+
+## Deployment
+
+- Cible naturelle : **Vercel** (projet Next.js ; `.gitignore` référence `.vercel`).
+  > Non confirmé par une config dans le repo — à valider avec l'équipe infra.
+- Variable d'environnement requise sur la plateforme : `NEXT_PUBLIC_BASE_URL`.
+- Build : `npm run build` puis `npm run start` (ou build géré par Vercel).
+- Aucun pipeline CI/CD ni Dockerfile présent dans le repo.
+
+---
+
+## Known Issues
+
+- **HTTPS requis en local** : le cookie de token est `secure: true` + `sameSite: 'none'`. En HTTP
+  (`localhost`), certains navigateurs peuvent refuser de poser le cookie → connexion impossible.
+- **Sans `NEXT_PUBLIC_BASE_URL`**, tous les appels API échouent silencieusement (base URL `undefined`).
+- **Pas de tests automatisés** : validation manuelle requise.
+- **Terminologie partiellement renommée** : l'UI affiche « LLP » / « Taux de rendement » mais le
+  code utilise encore `office` / `performance`.
+- **Version de Node non verrouillée** (pas de `engines` ni `.nvmrc`).
+- Le middleware vérifie la **présence** du cookie, pas la validité du token (validée côté API).
+
+---
+
+## Developer Notes
+
+- **Ajouter une feature métier** : suivre le pattern par domaine
+  `types/<domaine>` → `services/<domaine>Service.ts` → `hooks/<domaine>/use*.ts` →
+  `components/dashboard/<domaine>/*`.
+- **UI** : réutiliser `components/ui` (shadcn) et `components/custom` ; composer les classes avec
+  `cn()` ([`src/lib/utils.ts`](./src/lib/utils.ts)).
+- **Cache** : attention aux `queryKey` lors des mutations (invalidation). `useGetConsultants` met
+  `staleTime`/`gcTime` à 0 en mode recherche.
+- **Lint avant commit** : `npm run lint`.
+- **Connexion en dev** : nécessite un email **ADMIN** existant en base + le code OTP reçu par email,
+  et une API joignable.
+
+---
+
+📖 Pour l'audit complet (entrypoints, endpoints API, zones critiques, onboarding détaillé) :
+voir [`CLAUDE.md`](./CLAUDE.md).
