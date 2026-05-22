@@ -29,8 +29,10 @@ de gérer les consultants, leurs transactions, les sociétés de portage, les LL
 npm install
 
 # 2. Configurer l'environnement
-#    Créer un fichier .env.local à la racine :
-echo "NEXT_PUBLIC_BASE_URL=https://<url-de-votre-api>" > .env.local
+#    Copier le modèle puis renseigner l'URL de l'API :
+cp .env.example .env.local
+#    .env.local :
+#    NEXT_PUBLIC_BASE_URL=https://my-krew-be.onrender.com/my-krew
 
 # 3. Lancer le serveur de développement
 npm run dev
@@ -110,8 +112,10 @@ src/
 | `NEXT_PUBLIC_BASE_URL` | ✅ | URL de base de l'API REST externe (axios) |
 
 - Seule variable utilisée dans le code ([`src/config/axiosInstance.ts`](./src/config/axiosInstance.ts)).
+- Valeur de production : `https://my-krew-be.onrender.com/my-krew` (API partagée avec MyKrew App).
 - Préfixe `NEXT_PUBLIC_` ⇒ **inlinée dans le bundle client** : n'y mettre **aucun secret**.
-- Les fichiers `.env*` sont gitignorés. À placer dans `.env.local` en développement.
+- Les fichiers `.env*` sont gitignorés **sauf** [`.env.example`](./.env.example). Copier ce modèle
+  vers `.env.local` en développement.
 
 ---
 
@@ -170,8 +174,11 @@ src/
 - **Cache** : attention aux `queryKey` lors des mutations (invalidation). `useGetConsultants` met
   `staleTime`/`gcTime` à 0 en mode recherche.
 - **Lint avant commit** : `npm run lint`.
-- **Connexion en dev** : nécessite un email **ADMIN** existant en base + le code OTP reçu par email,
-  et une API joignable.
+- **Connexion en dev (login admin via OTP)** :
+  1. Saisir un email d'un compte **ADMIN** existant en base (comptes test fournis par l'équipe).
+  2. L'API envoie un **code OTP** à cet email ; le saisir pour valider.
+  3. Les comptes au rôle `USER` sont rejetés à la connexion (back-office réservé aux admins).
+  - Nécessite que l'API (`NEXT_PUBLIC_BASE_URL`) soit joignable.
 
 ---
 
