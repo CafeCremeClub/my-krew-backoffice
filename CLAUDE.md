@@ -185,12 +185,16 @@ npm install
 ```
 
 ### Variable d'environnement obligatoire
-Créer un fichier `.env.local` à la racine (voir §6 ci-dessous) :
+Copier le modèle fourni puis renseigner l'URL de l'API :
 ```bash
-NEXT_PUBLIC_BASE_URL=https://<url-de-votre-api>
+cp .env.example .env.local
 ```
-> Sans cette variable, tous les appels axios partent vers une base URL `undefined` → toutes les
-> requêtes échouent.
+Contenu de `.env.local` :
+```bash
+NEXT_PUBLIC_BASE_URL=https://my-krew-be.onrender.com/my-krew
+```
+> L'API back-end est la **même que MyKrew App**. Sans cette variable, tous les appels axios partent
+> vers une base URL `undefined` → toutes les requêtes échouent.
 
 ### Scripts disponibles (`package.json`)
 | Script | Commande | Description |
@@ -217,15 +221,11 @@ npm run dev
 | `NEXT_PUBLIC_BASE_URL` | ✅ | URL de base de l'API REST externe consommée par axios | Oui (préfixe `NEXT_PUBLIC_`) |
 
 - **C'est la seule variable d'environnement référencée dans le code** (`src/config/axiosInstance.ts`).
+- Valeur de production : `https://my-krew-be.onrender.com/my-krew` (API partagée avec MyKrew App).
 - Le préfixe `NEXT_PUBLIC_` signifie qu'elle est **inlinée dans le bundle client** : n'y mettre
   aucun secret.
-- Les fichiers `.env*` sont **gitignorés** (`.gitignore`). Aucun `.env.example` n'existe à ce jour.
-
-**Base suggérée pour `.env.example`** (non créé automatiquement) :
-```bash
-# URL de l'API MyKrew (back-end externe)
-NEXT_PUBLIC_BASE_URL=https://api.example.com
-```
+- Les fichiers `.env*` sont **gitignorés** sauf `.env.example` (exception `!.env.example` dans
+  `.gitignore`). Copier ce modèle vers `.env.local` pour le développement.
 
 ---
 
@@ -233,7 +233,7 @@ NEXT_PUBLIC_BASE_URL=https://api.example.com
 
 | Dépendance | Type | Détail |
 |---|---|---|
-| **API REST MyKrew** | API externe (obligatoire) | Toute la donnée et la logique métier. Base URL = `NEXT_PUBLIC_BASE_URL` |
+| **API REST MyKrew** | API externe (obligatoire) | Toute la donnée et la logique métier. Base URL = `NEXT_PUBLIC_BASE_URL` (prod : `https://my-krew-be.onrender.com/my-krew`). Identique à MyKrew App. Auth OTP gérée côté back-end. |
 | Cookie `token` | Auth | JWT stocké en cookie HTTP-only (`secure`, `sameSite: 'none'`) via Server Actions |
 
 ### Endpoints API consommés (référence)
@@ -272,15 +272,19 @@ NEXT_PUBLIC_BASE_URL=https://api.example.com
 
 ## 9. Déploiement & CI/CD
 
-- **Aucun pipeline CI/CD** présent dans le repo (pas de `.github/`, pas de `Dockerfile`,
-  pas de `vercel.json`).
-- Le `.gitignore` mentionne `.vercel`, suggérant un **déploiement Vercel** (cible naturelle d'un
-  projet Next.js), mais **non confirmé par la config du repo**.
-- Pour déployer : fournir `NEXT_PUBLIC_BASE_URL` comme variable d'environnement de la plateforme,
-  puis `npm run build` / `npm run start` (ou build géré par Vercel).
+- **Hébergement : Vercel** (déploiement automatique depuis le repo, build géré par Vercel).
+- **Aucun pipeline CI/CD ni Dockerfile** dans le repo : le déploiement passe entièrement par Vercel.
+- **Variable d'environnement (source de vérité prod)** : `NEXT_PUBLIC_BASE_URL` se configure dans
+  **Vercel → projet → Settings → Environment Variables**. C'est cette valeur qui s'applique en
+  production. Sans elle, le build prod pointe vers une base URL `undefined` → tous les appels API
+  échouent.
+- **Priorité Next.js** : en prod, la variable Vercel l'emporte ; `.env.local` n'est jamais déployé
+  (gitignoré) et `.env.example` n'est jamais lu par Next.js (simple modèle de convention).
+- Pour récupérer la valeur courante (ex. nouveau dev qui met en place en local) : la lire dans le
+  dashboard Vercel, ou utiliser la valeur de prod documentée en §7.
 
-> ⚠️ Zone d'incertitude : environnements (dev/staging/prod) et stratégie de déploiement non
-> documentés dans le repo. À confirmer avec l'équipe infra.
+> ⚠️ Zone d'incertitude : la séparation des environnements (dev / staging / prod) n'est pas
+> documentée dans le repo. À confirmer avec l'équipe infra si plusieurs environnements existent.
 
 ---
 
@@ -308,7 +312,8 @@ NEXT_PUBLIC_BASE_URL=https://api.example.com
 ## 11. Notes d'onboarding pour développeur
 
 1. **Cloner**, puis `npm install`.
-2. Créer `.env.local` avec `NEXT_PUBLIC_BASE_URL` pointant vers l'API (demander l'URL à l'équipe).
+2. `cp .env.example .env.local`, puis renseigner
+   `NEXT_PUBLIC_BASE_URL=https://my-krew-be.onrender.com/my-krew`.
 3. `npm run dev` → ouvrir http://localhost:3000.
 4. Pour se connecter : un email **autorisé en base (rôle ADMIN)** + le **code OTP** reçu par email.
    Sans backend joignable, la connexion est impossible.
