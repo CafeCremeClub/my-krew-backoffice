@@ -113,9 +113,18 @@ src/
 
 - Seule variable utilisée dans le code ([`src/config/axiosInstance.ts`](./src/config/axiosInstance.ts)).
 - Valeur de production : `https://my-krew-be.onrender.com/my-krew` (API partagée avec MyKrew App).
-- Préfixe `NEXT_PUBLIC_` ⇒ **inlinée dans le bundle client** : n'y mettre **aucun secret**.
+- Préfixe `NEXT_PUBLIC_` ⇒ **inlinée dans le bundle client** : n'y mettre **aucun secret**. Ce n'est
+  pas un secret, juste une URL publique — sans risque à versionner dans la doc.
 - Les fichiers `.env*` sont gitignorés **sauf** [`.env.example`](./.env.example). Copier ce modèle
   vers `.env.local` en développement.
+
+**Où récupérer la valeur ?**
+- **En local** : utiliser la valeur de production ci-dessus dans `.env.local`. Si elle a changé,
+  la source de vérité est le dashboard Vercel (ci-dessous).
+- **Source de vérité (prod)** : **Vercel → projet → Settings → Environment Variables →
+  `NEXT_PUBLIC_BASE_URL`**. C'est cette valeur qui s'applique en production.
+- **Priorité Next.js** : en prod, la variable définie dans Vercel l'emporte ; `.env.local`
+  n'est jamais déployé (gitignoré) et `.env.example` n'est jamais lu par Next.js (simple modèle).
 
 ---
 
@@ -143,11 +152,12 @@ src/
 
 ## Deployment
 
-- Cible naturelle : **Vercel** (projet Next.js ; `.gitignore` référence `.vercel`).
-  > Non confirmé par une config dans le repo — à valider avec l'équipe infra.
-- Variable d'environnement requise sur la plateforme : `NEXT_PUBLIC_BASE_URL`.
+- Hébergement : **Vercel** (déploiement automatique du repo ; build géré par Vercel).
+- **Variable d'environnement à configurer sur Vercel** (Settings → Environment Variables) :
+  `NEXT_PUBLIC_BASE_URL`. C'est la source de vérité en production — sans elle, le build prod
+  pointe vers une base URL `undefined` et tous les appels API échouent.
 - Build : `npm run build` puis `npm run start` (ou build géré par Vercel).
-- Aucun pipeline CI/CD ni Dockerfile présent dans le repo.
+- Aucun pipeline CI/CD ni Dockerfile présent dans le repo (le déploiement passe par Vercel).
 
 ---
 
