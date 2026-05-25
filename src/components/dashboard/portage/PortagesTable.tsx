@@ -44,26 +44,33 @@ const PortagesTable = () => {
             <TableHeader className="h-16">
               <TableRow>
                 <TableHead className="text-[#475467] text-xs min-w-40">
-                  ID
+                  Nom
                 </TableHead>
                 <TableHead className="text-[#475467] text-xs min-w-40">
-                  Nom
+                  Identifiant
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {portages.map((portage) => (
-                <TableRow
-                  key={portage.id}
-                  className="cursor-pointer hover:bg-gray-50 h-16"
-                >
+                <TableRow key={portage.id} className="hover:bg-gray-50 h-16">
                   <TableCell className="text-sm text-[#101828] font-medium">
-                    <div className="flex items-center gap-2">
-                      <span>{portage.id}</span>
+                    {portage.name}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className="text-xs text-[#98A2B3] font-mono"
+                        title={portage.id}
+                      >
+                        {portage.id}
+                      </span>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 hover:bg-gray-100 cursor-pointer"
+                        aria-label="Copier l'identifiant"
+                        title="Copier l'identifiant"
+                        className="h-6 w-6 hover:bg-gray-100 cursor-pointer text-[#98A2B3]"
                         onClick={async (e) => {
                           e.stopPropagation();
                           await copyToClipboard(portage.id);
@@ -72,9 +79,6 @@ const PortagesTable = () => {
                         <Copy className="h-3 w-3" />
                       </Button>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-[#101828] font-medium">
-                    {portage.name}
                   </TableCell>
                 </TableRow>
               ))}

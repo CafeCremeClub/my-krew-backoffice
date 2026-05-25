@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import CustomButton from '@/components/custom/CustomButton';
 import AddNewOfficeDialog from './AddNewOfficeDialog';
-import { Plus } from 'lucide-react';
+import { Plus, Info } from 'lucide-react';
 
 const OfficePageHeader = () => {
   const [isAddOfficeDialogOpen, setIsAddOfficeDialogOpen] =
@@ -12,7 +12,16 @@ const OfficePageHeader = () => {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-[#101828] font-semibold text-lg">Liste des LLPs</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-[#101828] font-semibold text-lg">Liste des LLPs</p>
+          <span
+            className="inline-flex items-center text-[#98A2B3] cursor-help"
+            title="LLP — Limited Liability Partnership : structure juridique de société à responsabilité limitée rattachée à un consultant."
+            aria-label="LLP signifie Limited Liability Partnership"
+          >
+            <Info className="size-4" />
+          </span>
+        </div>
 
         <CustomButton
           onClick={() => setIsAddOfficeDialogOpen(true)}
