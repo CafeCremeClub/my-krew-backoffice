@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
-import { Copy } from 'lucide-react';
+import React, { useState } from 'react';
+import { Copy, Pen } from 'lucide-react';
 import useGetPortages from '@/hooks/portage/useGetPortages';
 import PortagesTableSkeleton from '@/components/dashboard/portage/PortagesTableSkeleton';
+import EditPortageDialog from '@/components/dashboard/portage/EditPortageDialog';
 import {
   Table,
   TableBody,
@@ -14,9 +15,12 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Portage } from '@/types/portage/Portage';
 
 const PortagesTable = () => {
   const { isPending, isError, data: portages } = useGetPortages();
+
+  const [portageToEdit, setPortageToEdit] = useState<Portage | null>(null);
 
   const copyToClipboard = async (id: string) => {
     try {
@@ -32,6 +36,14 @@ const PortagesTable = () => {
 
   return (
     <div className="h-full overflow-y-auto">
+      {portageToEdit && (
+        <EditPortageDialog
+          isOpen={!!portageToEdit}
+          onClose={() => setPortageToEdit(null)}
+          portage={portageToEdit}
+        />
+      )}
+
       {isPending ? (
         <PortagesTableSkeleton />
       ) : isError ? (
@@ -48,6 +60,9 @@ const PortagesTable = () => {
                 </TableHead>
                 <TableHead className="text-[#475467] text-xs min-w-40">
                   Identifiant
+                </TableHead>
+                <TableHead className="text-[#475467] text-xs min-w-24">
+                  Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -79,6 +94,18 @@ const PortagesTable = () => {
                         <Copy className="h-3 w-3" />
                       </Button>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Modifier la société de portage"
+                      title="Modifier"
+                      className="h-8 w-8 hover:bg-gray-100 cursor-pointer text-[#475467]"
+                      onClick={() => setPortageToEdit(portage)}
+                    >
+                      <Pen className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

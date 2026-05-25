@@ -1,5 +1,6 @@
 import { Portage } from '@/types/portage/Portage';
 import { CreatePortagePayload } from '@/types/portage/CreatePortagePayload';
+import { UpdatePortagePayload } from '@/types/portage/UpdatePortagePayload';
 import axiosInstance from '@/config/axiosInstance';
 
 export const getPortages = async (): Promise<Portage[]> => {
@@ -16,6 +17,21 @@ export const createPortage = async (
 ): Promise<Portage> => {
   try {
     const response = await axiosInstance.post<Portage>('/portages', payload);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updatePortage = async (
+  payload: UpdatePortagePayload
+): Promise<Portage> => {
+  try {
+    const { id, ...data } = payload;
+    const response = await axiosInstance.patch<Portage>(
+      `/portages/${id}`,
+      data
+    );
     return response.data;
   } catch (error) {
     throw error;

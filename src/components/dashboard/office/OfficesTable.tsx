@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import useGetOffices from '@/hooks/office/useGetOffices';
 import OfficesTableSkeleton from '@/components/dashboard/office/OfficesTableSkeleton';
+import EditOfficeDialog from '@/components/dashboard/office/EditOfficeDialog';
 import {
   Table,
   TableBody,
@@ -13,10 +14,13 @@ import {
 } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
+import { Copy, Pen } from 'lucide-react';
+import { Office } from '@/types/office/Office';
 
 const OfficesTable = () => {
   const { isPending, isError, data: offices } = useGetOffices();
+
+  const [officeToEdit, setOfficeToEdit] = useState<Office | null>(null);
 
   const copyToClipboard = async (id: string) => {
     try {
@@ -32,6 +36,14 @@ const OfficesTable = () => {
 
   return (
     <div className="h-full overflow-y-auto">
+      {officeToEdit && (
+        <EditOfficeDialog
+          isOpen={!!officeToEdit}
+          onClose={() => setOfficeToEdit(null)}
+          office={officeToEdit}
+        />
+      )}
+
       {isPending ? (
         <OfficesTableSkeleton />
       ) : isError ? (
@@ -48,6 +60,9 @@ const OfficesTable = () => {
                 </TableHead>
                 <TableHead className="text-[#475467] text-xs min-w-40">
                   Identifiant
+                </TableHead>
+                <TableHead className="text-[#475467] text-xs min-w-24">
+                  Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -79,6 +94,18 @@ const OfficesTable = () => {
                         <Copy className="h-3 w-3" />
                       </Button>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Modifier le LLP"
+                      title="Modifier"
+                      className="h-8 w-8 hover:bg-gray-100 cursor-pointer text-[#475467]"
+                      onClick={() => setOfficeToEdit(office)}
+                    >
+                      <Pen className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
