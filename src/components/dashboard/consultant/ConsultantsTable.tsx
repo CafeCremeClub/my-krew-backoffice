@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import useGetConsultants from '@/hooks/consultant/useGetConsultants';
 import ConsultantsTableSkeleton from '@/components/dashboard/consultant/ConsultantsTableSkeleton';
 import {
@@ -11,10 +11,13 @@ import {
 } from '@/components/ui/table';
 import { ConsultantRole } from '@/types/consultant/ConsultantRole';
 import { ConsultantStatus } from '@/types/consultant/ConsultantStatus';
+import { Consultant } from '@/types/consultant/Consultant';
 import { formatDateToFR } from '@/utils/helpers/formatDateToFR';
 import ConsultantsTablePaginationControls from '@/components/dashboard/consultant/ConsultantsTablePaginationControls';
+import EditConsultantDialog from '@/components/dashboard/consultant/EditConsultantDialog';
+import DeleteConsultantAlertDialog from '@/components/dashboard/consultant/DeleteConsultantAlertDialog';
 import CustomButton from '@/components/custom/CustomButton';
-import { Eye } from 'lucide-react';
+import { Eye, Pen, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface ConsultantsTableProps {
@@ -27,6 +30,12 @@ const ConsultantsTable = ({
   setPage = () => {},
 }: ConsultantsTableProps) => {
   const router = useRouter();
+
+  const [consultantToEdit, setConsultantToEdit] = useState<Consultant | null>(
+    null
+  );
+  const [consultantToDelete, setConsultantToDelete] =
+    useState<Consultant | null>(null);
 
   const {
     isPending,
@@ -120,6 +129,23 @@ const ConsultantsTable = ({
 
   return (
     <>
+      {consultantToEdit && (
+        <EditConsultantDialog
+          isOpen={!!consultantToEdit}
+          onClose={() => setConsultantToEdit(null)}
+          consultant={consultantToEdit}
+        />
+      )}
+
+      {consultantToDelete && (
+        <DeleteConsultantAlertDialog
+          open={!!consultantToDelete}
+          onClose={() => setConsultantToDelete(null)}
+          consultant={consultantToDelete}
+          page={page}
+        />
+      )}
+
       <div className="h-full overflow-y-auto">
         {isPending ? (
           <ConsultantsTableSkeleton />
@@ -172,10 +198,16 @@ const ConsultantsTable = ({
                   {consultants.data.map((consultant) => (
                     <TableRow
                       key={consultant.id}
-                      className="cursor-pointer hover:bg-gray-50 h-16"
+                      className="hover:bg-gray-50 h-16"
                     >
                       <TableCell className="text-sm text-[#101828] font-medium">
-                        {`${consultant.firstname} ${consultant.lastname}`}
+                        <button
+                          type="button"
+                          onClick={() => handleViewDetails(consultant.id)}
+                          className="text-left hover:text-[#375DFB] hover:underline cursor-pointer"
+                        >
+                          {`${consultant.firstname} ${consultant.lastname}`}
+                        </button>
                       </TableCell>
                       <TableCell className="text-sm text-[#475467]">
                         {consultant.email}
@@ -207,12 +239,30 @@ const ConsultantsTable = ({
                         {formatPerformance(consultant.performance)}
                       </TableCell>
                       <TableCell className="text-sm text-[#475467]">
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
                           <CustomButton
                             onClick={() => handleViewDetails(consultant.id)}
                             icon={<Eye className="flex-none size-4" />}
                           >
                             Voir
+                          </CustomButton>
+                          <CustomButton
+                            aria-label="Modifier le consultant"
+                            title="Modifier"
+                            onClick={() => setConsultantToEdit(consultant)}
+                            className="bg-white border border-gray-200 shadow-none text-[#475467] hover:bg-gray-100 px-2.5"
+                            icon={<Pen className="flex-none size-4" />}
+                          >
+                            <span className="sr-only">Modifier</span>
+                          </CustomButton>
+                          <CustomButton
+                            aria-label="Supprimer le consultant"
+                            title="Supprimer"
+                            onClick={() => setConsultantToDelete(consultant)}
+                            className="bg-white border border-gray-200 shadow-none text-red-600 hover:bg-red-50 px-2.5"
+                            icon={<Trash className="flex-none size-4" />}
+                          >
+                            <span className="sr-only">Supprimer</span>
                           </CustomButton>
                         </div>
                       </TableCell>
