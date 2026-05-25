@@ -308,7 +308,7 @@ const AddNewConsultantDialog = ({
               <CustomSelect
                 value={formik.values.type}
                 onChange={(value) => formik.setFieldValue('type', value)}
-                placeholder="Sélectionnez une société de portage"
+                placeholder="Sélectionnez un type"
                 options={[
                   {
                     label: 'UK',
