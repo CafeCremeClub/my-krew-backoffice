@@ -12,8 +12,6 @@ import useDeleteConsultant from '@/hooks/consultant/useDeleteConsultant';
 import { toast } from 'sonner';
 import { Consultant } from '@/types/consultant/Consultant';
 import { useQueryClient } from '@tanstack/react-query';
-import { GET_CONSULTANTS_DEFAULT_PER_PAGE } from '@/hooks/consultant/useGetConsultants';
-import { GetConsultantsResponse } from '@/types/consultant/GetConsultantsResponse';
 
 interface DeleteConsultantAlertDialogProps {
   open: boolean;
@@ -27,7 +25,6 @@ const DeleteConsultantAlertDialog = ({
   open,
   onClose,
   consultant,
-  page,
   onDeleteSuccess,
 }: DeleteConsultantAlertDialogProps) => {
   const queryClient = useQueryClient();
@@ -37,25 +34,7 @@ const DeleteConsultantAlertDialog = ({
     try {
       await mutateAsync(consultant.id);
 
-      queryClient.setQueryData(
-        [
-          'get-consultants',
-          page ?? 1,
-          GET_CONSULTANTS_DEFAULT_PER_PAGE,
-          undefined,
-        ],
-        (oldData: GetConsultantsResponse) => {
-          if (!oldData) return oldData;
-
-          return {
-            ...oldData,
-            data: oldData.data.filter(
-              (c: Consultant) => c.id !== consultant.id
-            ),
-            total: oldData.total - 1,
-          };
-        }
-      );
+      await queryClient.invalidateQueries({ queryKey: ['get-consultants'] });
 
       toast.success('Consultant supprimé avec succès', {
         description: "Le consultant a été supprimé et n'est plus accessible.",

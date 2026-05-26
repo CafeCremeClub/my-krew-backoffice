@@ -10,7 +10,20 @@ const useGetConsultants = (params?: GetConsultantsParams) => {
     page: params?.page ?? DEFAULT_PAGE,
     perPage: params?.perPage ?? GET_CONSULTANTS_DEFAULT_PER_PAGE,
     search: params?.search ?? undefined,
+    status: params?.status ?? undefined,
+    portageId: params?.portageId ?? undefined,
+    officeId: params?.officeId ?? undefined,
+    sortBy: params?.sortBy ?? undefined,
+    sortOrder: params?.sortOrder ?? undefined,
   };
+
+  const hasActiveQuery = Boolean(
+    mergedParams.search ||
+      mergedParams.status ||
+      mergedParams.portageId ||
+      mergedParams.officeId ||
+      mergedParams.sortBy
+  );
 
   return useQuery({
     queryKey: [
@@ -18,14 +31,19 @@ const useGetConsultants = (params?: GetConsultantsParams) => {
       mergedParams.page,
       mergedParams.perPage,
       mergedParams.search,
+      mergedParams.status,
+      mergedParams.portageId,
+      mergedParams.officeId,
+      mergedParams.sortBy,
+      mergedParams.sortOrder,
     ],
     queryFn: async () => await getConsultants(mergedParams),
     retry: 0,
     refetchOnMount: 'always',
     refetchInterval: false,
     refetchOnWindowFocus: true,
-    staleTime: mergedParams.search ? 0 : 5 * 60 * 1000,
-    gcTime: mergedParams.search ? 0 : 5 * 60 * 1000,
+    staleTime: hasActiveQuery ? 0 : 5 * 60 * 1000,
+    gcTime: hasActiveQuery ? 0 : 5 * 60 * 1000,
   });
 };
 
