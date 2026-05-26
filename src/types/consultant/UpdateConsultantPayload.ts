@@ -9,4 +9,6 @@ export interface UpdateConsultantPayload {
   type?: ConsultantType;
   startDate?: Date;
   endDate?: Date;
+  officeId?: string;
+  portageId?: string;
 }

@@ -14,6 +14,8 @@ export interface Consultant {
   endDate?: string;
   office: string;
   portage: string;
+  officeId?: string;
+  portageId?: string;
   role: ConsultantRole;
   referrals: number;
   monthlyEstimation: number;

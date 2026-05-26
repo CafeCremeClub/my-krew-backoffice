@@ -7,6 +7,7 @@ import { CreateConsultantResponse } from '@/types/consultant/CreateConsultantRes
 import { CreateCSVConsultantsPayload } from '@/types/consultant/CreateCSVConsultantsPayload';
 import { GetConsultantByIdResponse } from '@/types/consultant/GetConsultantByIdResponse';
 import { UpdateConsultantPayload } from '@/types/consultant/UpdateConsultantPayload';
+import { UpdateUserIdentityPayload } from '@/types/consultant/UpdateUserIdentityPayload';
 
 export const getConsultants = async (
   params?: GetConsultantsParams
@@ -101,6 +102,17 @@ export const updateConsultant = async (
   try {
     const { id, ...data } = payload;
     await axiosInstance.patch(`/consultants/update/${id}`, data);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateUserIdentity = async (
+  payload: UpdateUserIdentityPayload
+): Promise<void> => {
+  try {
+    const { id, ...data } = payload;
+    await axiosInstance.patch(`/users/admin/${id}`, data);
   } catch (error) {
     throw error;
   }

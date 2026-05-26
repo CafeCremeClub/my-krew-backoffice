@@ -18,8 +18,10 @@ import CustomSelect from '@/components/custom/CustomSelect';
 import useGetPortages from '@/hooks/portage/useGetPortages';
 import useGetOffices from '@/hooks/office/useGetOffices';
 import useCreateConsultant from '@/hooks/consultant/useCreateConsultant';
+import useUpdateConsultantRole from '@/hooks/consultant/useUpdateConsultantRole';
 import { toast } from 'sonner';
 import { ConsultantType } from '@/types/consultant/ConsultantType';
+import { ConsultantRole } from '@/types/consultant/ConsultantRole';
 import { handleCreateConsultantError } from '@/utils/helpers/handleCreateConsultantError';
 import { useQueryClient } from '@tanstack/react-query';
 import { CreateConsultantPayload } from '@/types/consultant/CreateConsultantPayload';
@@ -56,6 +58,7 @@ const validationSchema = Yup.object({
     ),
   portageId: Yup.string().required('Société de portage requise'),
   officeId: Yup.string().required('LLP requis'),
+  role: Yup.string().required('Rôle requis'),
 });
 
 const AddNewConsultantDialog = ({
@@ -65,6 +68,8 @@ const AddNewConsultantDialog = ({
   const queryClient = useQueryClient();
 
   const { isPending, mutateAsync } = useCreateConsultant();
+
+  const { mutateAsync: updateRole } = useUpdateConsultantRole();
 
   const { isPending: isPortagesPending, data: portagesData } = useGetPortages();
 
@@ -82,6 +87,7 @@ const AddNewConsultantDialog = ({
       endDate: '',
       portageId: '',
       officeId: '',
+      role: ConsultantRole.NONE as string,
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
@@ -102,7 +108,21 @@ const AddNewConsultantDialog = ({
           payload.endDate = values.endDate;
         }
 
-        await mutateAsync(payload);
+        const createdConsultant = await mutateAsync(payload);
+
+        if (values.role !== ConsultantRole.NONE) {
+          try {
+            await updateRole({
+              id: createdConsultant.id,
+              role: values.role as ConsultantRole,
+            });
+          } catch (roleError) {
+            console.error(
+              'Échec de la mise à jour du rôle du consultant',
+              roleError
+            );
+          }
+        }
 
         await queryClient.invalidateQueries({
           queryKey: ['get-consultants'],
@@ -359,6 +379,27 @@ const AddNewConsultantDialog = ({
               )}
               {formik.touched.officeId && formik.errors.officeId && (
                 <CustomErrorIndicator message={formik.errors.officeId} />
+              )}
+            </div>
+
+            {/* Role Select */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="role">Rôle</Label>
+              <CustomSelect
+                value={formik.values.role}
+                onChange={(value) => formik.setFieldValue('role', value)}
+                placeholder="Sélectionnez un rôle"
+                options={[
+                  { label: 'Ambassadeur', value: ConsultantRole.AMBASSADOR },
+                  { label: 'Influenceur', value: ConsultantRole.INFLUENCER },
+                  { label: 'Élite', value: ConsultantRole.ELITE },
+                  { label: 'Aucun', value: ConsultantRole.NONE },
+                ]}
+                className="w-full"
+                isError={formik.touched.role && !!formik.errors.role}
+              />
+              {formik.touched.role && formik.errors.role && (
+                <CustomErrorIndicator message={formik.errors.role} />
               )}
             </div>
           </form>
