@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import CustomErrorIndicator from '@/components/custom/CustomErrorIndicator';
 import CustomButton from '@/components/custom/CustomButton';
 import CustomSelect from '@/components/custom/CustomSelect';
@@ -21,6 +22,9 @@ import { ConsultantType } from '@/types/consultant/ConsultantType';
 import { Consultant } from '@/types/consultant/Consultant';
 import useUpdateConsultantRole from '@/hooks/consultant/useUpdateConsultantRole';
 import useUpdateConsultant from '@/hooks/consultant/useUpdateConsultant';
+import useUpdateUserIdentity from '@/hooks/consultant/useUpdateUserIdentity';
+import useGetPortages from '@/hooks/portage/useGetPortages';
+import useGetOffices from '@/hooks/office/useGetOffices';
 
 interface EditConsultantDialogProps {
   isOpen: boolean;
@@ -35,11 +39,19 @@ const EditConsultantDialog = ({
 }: EditConsultantDialogProps) => {
   const { mutateAsync: updateRole } = useUpdateConsultantRole();
   const { mutateAsync: updateConsultant } = useUpdateConsultant();
+  const { mutateAsync: updateUserIdentity } = useUpdateUserIdentity();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { isPending: isPortagesPending, data: portagesData } = useGetPortages();
+  const { isPending: isOfficesPending, data: officesData } = useGetOffices();
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
+      firstName: consultant.firstname || '',
+      lastName: consultant.lastname || '',
+      email: consultant.email || '',
+      phone: consultant.phone || '',
       role: consultant.role || '',
       monthlyEstimation: consultant.monthlyEstimation || 0,
       performance: consultant.performance || 0,
@@ -47,8 +59,20 @@ const EditConsultantDialog = ({
       type: consultant.type || ConsultantType.UK,
       startDate: consultant.startDate ? consultant.startDate.split('T')[0] : '',
       endDate: consultant.endDate ? consultant.endDate.split('T')[0] : '',
+      portageId: consultant.portageId || '',
+      officeId: consultant.officeId || '',
     },
     validationSchema: Yup.object({
+      firstName: Yup.string()
+        .min(2, 'Le prénom doit contenir au moins 2 caractères')
+        .required('Prénom requis'),
+      lastName: Yup.string()
+        .min(2, 'Le nom de famille doit contenir au moins 2 caractères')
+        .required('Nom de famille requis'),
+      email: Yup.string().email('Email invalide').required('Email requis'),
+      phone: Yup.string()
+        .matches(/^[+]?[0-9\s\-()]{10,}$/, 'Numéro de téléphone invalide')
+        .required('Téléphone requis'),
       role: Yup.string().required('Role requis'),
       monthlyEstimation: Yup.number()
         .min(0, "L'estimation doit être positive")
@@ -60,6 +84,8 @@ const EditConsultantDialog = ({
       type: Yup.string().required('Type requis'),
       startDate: Yup.date().required('Date de début requise'),
       endDate: Yup.date().nullable(),
+      portageId: Yup.string().required('Société de portage requise'),
+      officeId: Yup.string().required('LLP requis'),
     }),
     onSubmit: async (values) => {
       setIsSubmitting(true);
@@ -73,7 +99,15 @@ const EditConsultantDialog = ({
           values.status !== consultant.status ||
           values.type !== consultant.type ||
           values.startDate !== consultant.startDate?.split('T')[0] ||
-          (values.endDate || '') !== (consultant.endDate?.split('T')[0] || '');
+          (values.endDate || '') !== (consultant.endDate?.split('T')[0] || '') ||
+          values.portageId !== (consultant.portageId || '') ||
+          values.officeId !== (consultant.officeId || '');
+
+        const identityChanged =
+          values.firstName !== consultant.firstname ||
+          values.lastName !== consultant.lastname ||
+          values.email !== consultant.email ||
+          values.phone !== (consultant.phone || '');
 
         const roleChanged = values.role !== consultant.role;
 
@@ -89,6 +123,20 @@ const EditConsultantDialog = ({
               type: values.type as ConsultantType,
               startDate: new Date(values.startDate),
               endDate: values.endDate ? new Date(values.endDate) : undefined,
+              officeId: values.officeId,
+              portageId: values.portageId,
+            })
+          );
+        }
+
+        if (identityChanged) {
+          promises.push(
+            updateUserIdentity({
+              id: consultant.id,
+              firstname: values.firstName,
+              lastname: values.lastName,
+              email: values.email,
+              phone: values.phone,
             })
           );
         }
@@ -133,6 +181,18 @@ const EditConsultantDialog = ({
     },
   });
 
+  const portageOptions =
+    portagesData?.map((portage) => ({
+      label: portage.name,
+      value: portage.id,
+    })) || [];
+
+  const officeOptions =
+    officesData?.map((office) => ({
+      label: office.name,
+      value: office.id,
+    })) || [];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-3xl p-1 rounded-[1.25rem] px-2 max-h-[95vh] overflow-y-auto hidden-scrollbar">
@@ -147,7 +207,90 @@ const EditConsultantDialog = ({
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={formik.handleSubmit} className="space-y-8">
-            {/* Section 1: Informations du consultant */}
+            {/* Section 1: Identité */}
+            <div className="space-y-4 border border-gray-200 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-[#101828]">Identité</h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* First Name */}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="firstName">Prénom</Label>
+                  <CustomInput
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    placeholder="Entrez le prénom"
+                    value={formik.values.firstName}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    isError={
+                      formik.touched.firstName && !!formik.errors.firstName
+                    }
+                  />
+                  {formik.touched.firstName && formik.errors.firstName && (
+                    <CustomErrorIndicator message={formik.errors.firstName} />
+                  )}
+                </div>
+
+                {/* Last Name */}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="lastName">Nom de famille</Label>
+                  <CustomInput
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    placeholder="Entrez le nom de famille"
+                    value={formik.values.lastName}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    isError={
+                      formik.touched.lastName && !!formik.errors.lastName
+                    }
+                  />
+                  {formik.touched.lastName && formik.errors.lastName && (
+                    <CustomErrorIndicator message={formik.errors.lastName} />
+                  )}
+                </div>
+
+                {/* Email */}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="email">Email</Label>
+                  <CustomInput
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="exemple@email.com"
+                    value={formik.values.email}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    isError={formik.touched.email && !!formik.errors.email}
+                  />
+                  {formik.touched.email && formik.errors.email && (
+                    <CustomErrorIndicator message={formik.errors.email} />
+                  )}
+                </div>
+
+                {/* Phone */}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="phone">Téléphone</Label>
+                  <CustomInput
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="+33 1 23 45 67 89"
+                    value={formik.values.phone}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    isError={formik.touched.phone && !!formik.errors.phone}
+                  />
+                  {formik.touched.phone && formik.errors.phone && (
+                    <CustomErrorIndicator message={formik.errors.phone} />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2: Informations du consultant */}
             <div className="space-y-4 border border-gray-200 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-[#101828]">
                 Informations du consultant
@@ -278,10 +421,58 @@ const EditConsultantDialog = ({
                     <CustomErrorIndicator message={formik.errors.endDate} />
                   )}
                 </div>
+
+                {/* Portage Select */}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="portageId">Société de portage</Label>
+                  {isPortagesPending ? (
+                    <Skeleton className="h-[2.5rem] w-full rounded-[0.625rem]" />
+                  ) : (
+                    <CustomSelect
+                      value={formik.values.portageId}
+                      onChange={(value) =>
+                        formik.setFieldValue('portageId', value)
+                      }
+                      placeholder="Sélectionnez une société de portage"
+                      options={portageOptions}
+                      className="w-full"
+                      isError={
+                        formik.touched.portageId && !!formik.errors.portageId
+                      }
+                    />
+                  )}
+                  {formik.touched.portageId && formik.errors.portageId && (
+                    <CustomErrorIndicator message={formik.errors.portageId} />
+                  )}
+                </div>
+
+                {/* Office Select */}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="officeId">LLP</Label>
+                  {isOfficesPending ? (
+                    <Skeleton className="h-[2.5rem] w-full rounded-[0.625rem]" />
+                  ) : (
+                    <CustomSelect
+                      value={formik.values.officeId}
+                      onChange={(value) =>
+                        formik.setFieldValue('officeId', value)
+                      }
+                      placeholder="Sélectionnez un LLP"
+                      options={officeOptions}
+                      className="w-full"
+                      isError={
+                        formik.touched.officeId && !!formik.errors.officeId
+                      }
+                    />
+                  )}
+                  {formik.touched.officeId && formik.errors.officeId && (
+                    <CustomErrorIndicator message={formik.errors.officeId} />
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Section 2: Rôle */}
+            {/* Section 3: Rôle */}
             <div className="space-y-4 border border-gray-200 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-[#101828]">Rôle</h3>
 
