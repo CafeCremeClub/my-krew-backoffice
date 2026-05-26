@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useGetConsultants from '@/hooks/consultant/useGetConsultants';
 import ConsultantsTableSkeleton from '@/components/dashboard/consultant/ConsultantsTableSkeleton';
 import {
@@ -20,6 +20,7 @@ import { formatDateToFR } from '@/utils/helpers/formatDateToFR';
 import ConsultantsTablePaginationControls from '@/components/dashboard/consultant/ConsultantsTablePaginationControls';
 import EditConsultantDialog from '@/components/dashboard/consultant/EditConsultantDialog';
 import DeleteConsultantAlertDialog from '@/components/dashboard/consultant/DeleteConsultantAlertDialog';
+import BulkEditConsultantsDialog from '@/components/dashboard/consultant/BulkEditConsultantsDialog';
 import CustomButton from '@/components/custom/CustomButton';
 import { ArrowDown, ArrowUp, ChevronsUpDown, Eye, Pen, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -57,6 +58,10 @@ const ConsultantsTable = ({
   const [consultantToDelete, setConsultantToDelete] =
     useState<Consultant | null>(null);
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkEditOpen, setIsBulkEditOpen] = useState<boolean>(false);
+  const selectAllRef = useRef<HTMLInputElement>(null);
+
   const {
     isPending,
     isError,
@@ -75,6 +80,54 @@ const ConsultantsTable = ({
   const hasActiveQuery = Boolean(
     search || status || portageId || officeId || sortBy
   );
+
+  const currentPageIds = useMemo(
+    () => consultants?.data.map((consultant) => consultant.id) ?? [],
+    [consultants]
+  );
+
+  // Reset selection whenever the displayed page of data changes.
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [page, perPage, search, status, portageId, officeId, sortBy, sortOrder]);
+
+  const allCurrentSelected =
+    currentPageIds.length > 0 &&
+    currentPageIds.every((id) => selectedIds.has(id));
+  const someCurrentSelected =
+    currentPageIds.some((id) => selectedIds.has(id)) && !allCurrentSelected;
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someCurrentSelected;
+    }
+  }, [someCurrentSelected, currentPageIds.length, selectedIds]);
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allCurrentSelected) {
+        currentPageIds.forEach((id) => next.delete(id));
+      } else {
+        currentPageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -188,6 +241,18 @@ const ConsultantsTable = ({
         />
       )}
 
+      {isBulkEditOpen && (
+        <BulkEditConsultantsDialog
+          isOpen={isBulkEditOpen}
+          onClose={() => setIsBulkEditOpen(false)}
+          selectedIds={Array.from(selectedIds)}
+          onSuccess={() => {
+            setIsBulkEditOpen(false);
+            clearSelection();
+          }}
+        />
+      )}
+
       <div className="h-full overflow-y-auto">
         {isPending ? (
           <ConsultantsTableSkeleton />
@@ -197,10 +262,42 @@ const ConsultantsTable = ({
           </div>
         ) : consultants && consultants.data.length > 0 ? (
           <>
+            {selectedIds.size > 0 && (
+              <div className="flex items-center justify-between gap-4 mb-3 px-4 py-3 rounded-[0.625rem] border border-[#E2E4E9] bg-[#F6F8FA]">
+                <p className="text-sm font-medium text-[#101828]">
+                  {selectedIds.size} sélectionné(s)
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={clearSelection}
+                    className="text-sm font-medium text-[#475467] hover:text-[#101828] cursor-pointer"
+                  >
+                    Désélectionner
+                  </button>
+                  <CustomButton
+                    onClick={() => setIsBulkEditOpen(true)}
+                    icon={<Pen className="flex-none size-4" />}
+                  >
+                    Modifier la sélection
+                  </CustomButton>
+                </div>
+              </div>
+            )}
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader className="h-16">
                   <TableRow>
+                    <TableHead className="text-[#475467] text-xs w-12">
+                      <input
+                        ref={selectAllRef}
+                        type="checkbox"
+                        aria-label="Tout sélectionner sur cette page"
+                        className="size-4 cursor-pointer accent-[#375DFB]"
+                        checked={allCurrentSelected}
+                        onChange={toggleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-40">
                       <button
                         type="button"
@@ -256,6 +353,16 @@ const ConsultantsTable = ({
                       key={consultant.id}
                       className="hover:bg-gray-50 h-16"
                     >
+                      <TableCell className="text-sm">
+                        <input
+                          type="checkbox"
+                          aria-label={`Sélectionner ${consultant.firstname} ${consultant.lastname}`}
+                          className="size-4 cursor-pointer accent-[#375DFB]"
+                          checked={selectedIds.has(consultant.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={() => toggleSelectOne(consultant.id)}
+                        />
+                      </TableCell>
                       <TableCell className="text-sm text-[#101828] font-medium">
                         <button
                           type="button"

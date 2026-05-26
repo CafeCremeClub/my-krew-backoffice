@@ -8,6 +8,10 @@ import { CreateCSVConsultantsPayload } from '@/types/consultant/CreateCSVConsult
 import { GetConsultantByIdResponse } from '@/types/consultant/GetConsultantByIdResponse';
 import { UpdateConsultantPayload } from '@/types/consultant/UpdateConsultantPayload';
 import { UpdateUserIdentityPayload } from '@/types/consultant/UpdateUserIdentityPayload';
+import {
+  BulkUpdateConsultantsPayload,
+  BulkUpdateConsultantsResult,
+} from '@/types/consultant/BulkUpdateConsultantsPayload';
 
 export const getConsultants = async (
   params?: GetConsultantsParams
@@ -102,6 +106,20 @@ export const updateConsultant = async (
   try {
     const { id, ...data } = payload;
     await axiosInstance.patch(`/consultants/update/${id}`, data);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const bulkUpdateConsultants = async (
+  payload: BulkUpdateConsultantsPayload
+): Promise<BulkUpdateConsultantsResult> => {
+  try {
+    const response = await axiosInstance.patch<BulkUpdateConsultantsResult>(
+      '/consultants/batch',
+      payload
+    );
+    return response.data;
   } catch (error) {
     throw error;
   }
