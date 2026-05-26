@@ -12,22 +12,42 @@ import {
 import { ConsultantRole } from '@/types/consultant/ConsultantRole';
 import { ConsultantStatus } from '@/types/consultant/ConsultantStatus';
 import { Consultant } from '@/types/consultant/Consultant';
+import {
+  ConsultantsSortBy,
+  ConsultantsSortOrder,
+} from '@/types/consultant/GetConsultantsParams';
 import { formatDateToFR } from '@/utils/helpers/formatDateToFR';
 import ConsultantsTablePaginationControls from '@/components/dashboard/consultant/ConsultantsTablePaginationControls';
 import EditConsultantDialog from '@/components/dashboard/consultant/EditConsultantDialog';
 import DeleteConsultantAlertDialog from '@/components/dashboard/consultant/DeleteConsultantAlertDialog';
 import CustomButton from '@/components/custom/CustomButton';
-import { Eye, Pen, Trash } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronsUpDown, Eye, Pen, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface ConsultantsTableProps {
   page?: number;
   setPage?: (page: number) => void;
+  perPage?: number;
+  search?: string;
+  status?: string;
+  portageId?: string;
+  officeId?: string;
+  sortBy?: ConsultantsSortBy;
+  sortOrder?: ConsultantsSortOrder;
+  onSort?: (column: ConsultantsSortBy) => void;
 }
 
 const ConsultantsTable = ({
   page,
   setPage = () => {},
+  perPage,
+  search,
+  status,
+  portageId,
+  officeId,
+  sortBy,
+  sortOrder,
+  onSort = () => {},
 }: ConsultantsTableProps) => {
   const router = useRouter();
 
@@ -43,10 +63,32 @@ const ConsultantsTable = ({
     data: consultants,
   } = useGetConsultants({
     page,
+    perPage,
+    search: search || undefined,
+    status: status || undefined,
+    portageId: portageId || undefined,
+    officeId: officeId || undefined,
+    sortBy,
+    sortOrder,
   });
+
+  const hasActiveQuery = Boolean(
+    search || status || portageId || officeId || sortBy
+  );
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
+  };
+
+  const renderSortIcon = (column: ConsultantsSortBy) => {
+    if (sortBy !== column) {
+      return <ChevronsUpDown className="size-3.5 text-[#98A2B3]" />;
+    }
+    return sortOrder === 'asc' ? (
+      <ArrowUp className="size-3.5 text-[#375DFB]" />
+    ) : (
+      <ArrowDown className="size-3.5 text-[#375DFB]" />
+    );
   };
 
   const getStatusLabel = (status: ConsultantStatus) => {
@@ -160,7 +202,14 @@ const ConsultantsTable = ({
                 <TableHeader className="h-16">
                   <TableRow>
                     <TableHead className="text-[#475467] text-xs min-w-40">
-                      Nom complet
+                      <button
+                        type="button"
+                        onClick={() => onSort('name')}
+                        className="flex items-center gap-1 cursor-pointer hover:text-[#101828]"
+                      >
+                        Nom complet
+                        {renderSortIcon('name')}
+                      </button>
                     </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-40">
                       Email
@@ -169,7 +218,14 @@ const ConsultantsTable = ({
                       Statut
                     </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-32">
-                      Date de début
+                      <button
+                        type="button"
+                        onClick={() => onSort('startDate')}
+                        className="flex items-center gap-1 cursor-pointer hover:text-[#101828]"
+                      >
+                        Date de début
+                        {renderSortIcon('startDate')}
+                      </button>
                     </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-32">
                       Date de fin
@@ -279,6 +335,15 @@ const ConsultantsTable = ({
               onPageChange={handlePageChange}
             />
           </>
+        ) : hasActiveQuery ? (
+          <div className="h-full flex flex-col justify-center items-center gap-0.5">
+            <p className="font-semibold text-center text-2xl text-[#101828]">
+              Aucun résultat
+            </p>
+            <p className="text-center text-sm text-[#525866] font-medium">
+              Aucun consultant ne correspond à votre recherche ou à vos filtres.
+            </p>
+          </div>
         ) : (
           <div className="h-full flex flex-col justify-center items-center gap-0.5">
             <p className="font-semibold text-center text-2xl text-[#101828]">

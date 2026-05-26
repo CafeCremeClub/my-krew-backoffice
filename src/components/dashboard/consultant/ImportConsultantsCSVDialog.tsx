@@ -17,13 +17,8 @@ import { toast } from 'sonner';
 import Papa from 'papaparse';
 import * as yup from 'yup';
 import { useQueryClient } from '@tanstack/react-query';
-import { GET_CONSULTANTS_DEFAULT_PER_PAGE } from '@/hooks/consultant/useGetConsultants';
-import { Consultant } from '@/types/consultant/Consultant';
-import { ConsultantRole } from '@/types/consultant/ConsultantRole';
-import { GetConsultantsResponse } from '@/types/consultant/GetConsultantsResponse';
 import useGetPortages from '@/hooks/portage/useGetPortages';
 import useGetOffices from '@/hooks/office/useGetOffices';
-import { ConsultantStatus } from '@/types/consultant/ConsultantStatus';
 
 interface ImportCSVDialogProps {
   isOpen: boolean;
@@ -93,7 +88,6 @@ const validatePayload = (
 const ImportConsultantsCSVDialog = ({
   isOpen,
   onClose,
-  page,
 }: ImportCSVDialogProps) => {
   const queryClient = useQueryClient();
 
@@ -249,51 +243,9 @@ const ImportConsultantsCSVDialog = ({
     };
 
     try {
-      const res = await createCSVConsultants(payload);
+      await createCSVConsultants(payload);
 
-      const createdConsultants: Consultant[] = res.map((consultant, index) => {
-        const csvUser = csvData[index];
-        const officeName =
-          officesData?.find((office) => office.id === csvUser.officeId)?.name ||
-          'N/A';
-        const portageName =
-          portagesData?.find((portage) => portage.id === csvUser.portageId)
-            ?.name || 'N/A';
-
-        return {
-          id: consultant.id,
-          firstname: consultant.firstname,
-          lastname: consultant.lastname,
-          email: consultant.email,
-          phone: consultant.phone,
-          role: ConsultantRole.NONE,
-          endDate: csvUser.endDate || undefined,
-          monthlyEstimation: 0,
-          office: officeName,
-          performance: 0,
-          portage: portageName,
-          referrals: 0,
-          startDate: csvUser.startDate,
-          status: csvUser.status as ConsultantStatus,
-          type: csvUser.type as ConsultantType,
-        };
-      });
-
-      const queryKey = [
-        'get-consultants',
-        page ?? 1,
-        GET_CONSULTANTS_DEFAULT_PER_PAGE,
-        undefined,
-      ];
-      queryClient.setQueryData<GetConsultantsResponse>(queryKey, (oldData) => {
-        if (!oldData) return oldData;
-
-        return {
-          ...oldData,
-          total: oldData.total + createdConsultants.length,
-          data: [...createdConsultants, ...oldData.data],
-        };
-      });
+      await queryClient.invalidateQueries({ queryKey: ['get-consultants'] });
 
       toast.success(`${csvData.length} consultant(s) importé(s) avec succès`, {
         position: 'bottom-right',
