@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Copy, Pen } from 'lucide-react';
+import { Copy, Pen, Trash } from 'lucide-react';
 import useGetPortages from '@/hooks/portage/useGetPortages';
 import PortagesTableSkeleton from '@/components/dashboard/portage/PortagesTableSkeleton';
 import EditPortageDialog from '@/components/dashboard/portage/EditPortageDialog';
+import DeletePortageAlertDialog from '@/components/dashboard/portage/DeletePortageAlertDialog';
 import {
   Table,
   TableBody,
@@ -21,6 +22,7 @@ const PortagesTable = () => {
   const { isPending, isError, data: portages } = useGetPortages();
 
   const [portageToEdit, setPortageToEdit] = useState<Portage | null>(null);
+  const [portageToDelete, setPortageToDelete] = useState<Portage | null>(null);
 
   const copyToClipboard = async (id: string) => {
     try {
@@ -41,6 +43,14 @@ const PortagesTable = () => {
           isOpen={!!portageToEdit}
           onClose={() => setPortageToEdit(null)}
           portage={portageToEdit}
+        />
+      )}
+
+      {portageToDelete && (
+        <DeletePortageAlertDialog
+          open={!!portageToDelete}
+          onClose={() => setPortageToDelete(null)}
+          portage={portageToDelete}
         />
       )}
 
@@ -96,16 +106,34 @@ const PortagesTable = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Modifier la société de portage"
-                      title="Modifier"
-                      className="h-8 w-8 hover:bg-gray-100 cursor-pointer text-[#475467]"
-                      onClick={() => setPortageToEdit(portage)}
-                    >
-                      <Pen className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Modifier la société de portage"
+                        title="Modifier"
+                        className="h-8 w-8 hover:bg-gray-100 cursor-pointer text-[#475467]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPortageToEdit(portage);
+                        }}
+                      >
+                        <Pen className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Supprimer la société de portage"
+                        title="Supprimer"
+                        className="h-8 w-8 hover:bg-red-50 cursor-pointer text-red-600"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPortageToDelete(portage);
+                        }}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

@@ -34,3 +34,11 @@ export const updateOffice = async (
     throw error;
   }
 };
+
+export const deleteOffice = async (id: string): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/offices/${id}`);
+  } catch (error) {
+    throw error;
+  }
+};

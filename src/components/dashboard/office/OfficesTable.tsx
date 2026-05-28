@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import useGetOffices from '@/hooks/office/useGetOffices';
 import OfficesTableSkeleton from '@/components/dashboard/office/OfficesTableSkeleton';
 import EditOfficeDialog from '@/components/dashboard/office/EditOfficeDialog';
+import DeleteOfficeAlertDialog from '@/components/dashboard/office/DeleteOfficeAlertDialog';
 import {
   Table,
   TableBody,
@@ -14,13 +15,14 @@ import {
 } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Copy, Pen } from 'lucide-react';
+import { Copy, Pen, Trash } from 'lucide-react';
 import { Office } from '@/types/office/Office';
 
 const OfficesTable = () => {
   const { isPending, isError, data: offices } = useGetOffices();
 
   const [officeToEdit, setOfficeToEdit] = useState<Office | null>(null);
+  const [officeToDelete, setOfficeToDelete] = useState<Office | null>(null);
 
   const copyToClipboard = async (id: string) => {
     try {
@@ -41,6 +43,14 @@ const OfficesTable = () => {
           isOpen={!!officeToEdit}
           onClose={() => setOfficeToEdit(null)}
           office={officeToEdit}
+        />
+      )}
+
+      {officeToDelete && (
+        <DeleteOfficeAlertDialog
+          open={!!officeToDelete}
+          onClose={() => setOfficeToDelete(null)}
+          office={officeToDelete}
         />
       )}
 
@@ -96,16 +106,34 @@ const OfficesTable = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Modifier le LLP"
-                      title="Modifier"
-                      className="h-8 w-8 hover:bg-gray-100 cursor-pointer text-[#475467]"
-                      onClick={() => setOfficeToEdit(office)}
-                    >
-                      <Pen className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Modifier le LLP"
+                        title="Modifier"
+                        className="h-8 w-8 hover:bg-gray-100 cursor-pointer text-[#475467]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOfficeToEdit(office);
+                        }}
+                      >
+                        <Pen className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Supprimer le LLP"
+                        title="Supprimer"
+                        className="h-8 w-8 hover:bg-red-50 cursor-pointer text-red-600"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOfficeToDelete(office);
+                        }}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

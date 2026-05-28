@@ -82,3 +82,11 @@ export const updateTransaction = async (
     throw error;
   }
 };
+
+export const deleteTransaction = async (id: string): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/transactions/${id}`);
+  } catch (error) {
+    throw error;
+  }
+};
