@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import CustomButton from '@/components/custom/CustomButton';
+import CustomInput from '@/components/custom/CustomInput';
 import CustomSelect from '@/components/custom/CustomSelect';
 import { Textarea } from '@/components/ui/textarea';
 import { useFormik } from 'formik';
@@ -17,6 +18,7 @@ import CustomErrorIndicator from '@/components/custom/CustomErrorIndicator';
 import useUpdateTransaction from '@/hooks/transaction/useUpdateTransaction';
 import { toast } from 'sonner';
 import { TransactionStatus } from '@/types/transaction/TransactionStatus';
+import { TransactionType } from '@/types/transaction/TransactionType';
 import { Transaction } from '@/types/transaction/Transaction';
 
 interface EditTransactionDialogProps {
@@ -26,6 +28,16 @@ interface EditTransactionDialogProps {
 }
 
 const validationSchema = Yup.object({
+  type: Yup.string()
+    .oneOf(Object.values(TransactionType), 'Type de transaction invalide')
+    .required('Type de transaction requis'),
+  amount: Yup.number()
+    .typeError('Montant invalide')
+    .min(0, 'Le montant doit être positif')
+    .required('Montant requis'),
+  date: Yup.date()
+    .typeError('Date invalide')
+    .required('Date requise'),
   status: Yup.string()
     .oneOf(Object.values(TransactionStatus), 'Statut invalide')
     .required('Statut requis'),
@@ -42,19 +54,40 @@ const EditTransactionDialog = ({
 }: EditTransactionDialogProps) => {
   const { isPending, mutateAsync } = useUpdateTransaction();
 
+  const initialDate = transaction.date ? transaction.date.split('T')[0] : '';
+  const initialAmount =
+    transaction.amount !== undefined && transaction.amount !== null
+      ? String(transaction.amount)
+      : '';
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
+      type: transaction.type as TransactionType,
+      amount: initialAmount,
+      date: initialDate,
       status: transaction.status,
       comment: transaction.comment || '',
     },
     validationSchema,
     onSubmit: async (values) => {
       try {
+        const numericAmount = Number(values.amount);
+        const initialNumericAmount = Number(initialAmount);
+
+        const typeChanged = values.type !== transaction.type;
+        const amountChanged = numericAmount !== initialNumericAmount;
+        const dateChanged = values.date !== initialDate;
         const statusChanged = values.status !== transaction.status;
         const commentChanged = values.comment !== (transaction.comment || '');
 
-        if (!statusChanged && !commentChanged) {
+        if (
+          !typeChanged &&
+          !amountChanged &&
+          !dateChanged &&
+          !statusChanged &&
+          !commentChanged
+        ) {
           toast.info('Aucune modification détectée', {
             position: 'bottom-right',
           });
@@ -63,6 +96,9 @@ const EditTransactionDialog = ({
 
         await mutateAsync({
           id: transaction.id,
+          type: typeChanged ? values.type : undefined,
+          amount: amountChanged ? numericAmount : undefined,
+          date: dateChanged ? values.date : undefined,
           status: statusChanged ? values.status : undefined,
           comment: commentChanged ? values.comment : undefined,
         });
@@ -88,6 +124,12 @@ const EditTransactionDialog = ({
     },
   });
 
+  const transactionTypeOptions = [
+    { label: 'Salaire', value: TransactionType.SALARY },
+    { label: 'Participation', value: TransactionType.PARTICIPATION },
+    { label: 'Parrainage', value: TransactionType.REFERRAL },
+  ];
+
   const transactionStatusOptions = [
     { label: 'Payée', value: TransactionStatus.PAYED },
     { label: 'En attente', value: TransactionStatus.PENDING },
@@ -101,10 +143,62 @@ const EditTransactionDialog = ({
           <DialogHeader>
             <DialogTitle>Modifier la transaction</DialogTitle>
             <DialogDescription>
-              Modifiez le statut ou les commentaires de la transaction.
+              Modifiez les informations de la transaction.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={formik.handleSubmit} className="space-y-6">
+            {/* Transaction Type */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="type">Type de transaction</Label>
+              <CustomSelect
+                placeholder="Sélectionnez le type"
+                options={transactionTypeOptions}
+                value={formik.values.type}
+                onChange={(value) => formik.setFieldValue('type', value)}
+                isError={formik.touched.type && !!formik.errors.type}
+                className="w-full"
+              />
+              {formik.touched.type && formik.errors.type && (
+                <CustomErrorIndicator message={formik.errors.type} />
+              )}
+            </div>
+
+            {/* Amount */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="amount">Montant (€)</Label>
+              <CustomInput
+                id="amount"
+                name="amount"
+                type="number"
+                step="0.01"
+                placeholder="1000.00"
+                value={formik.values.amount}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                isError={formik.touched.amount && !!formik.errors.amount}
+              />
+              {formik.touched.amount && formik.errors.amount && (
+                <CustomErrorIndicator message={formik.errors.amount} />
+              )}
+            </div>
+
+            {/* Date */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="date">Date</Label>
+              <CustomInput
+                id="date"
+                name="date"
+                type="date"
+                value={formik.values.date}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                isError={formik.touched.date && !!formik.errors.date}
+              />
+              {formik.touched.date && formik.errors.date && (
+                <CustomErrorIndicator message={formik.errors.date} />
+              )}
+            </div>
+
             {/* Status */}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="status">Statut</Label>
