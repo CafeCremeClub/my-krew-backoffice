@@ -16,6 +16,8 @@ import useGetPortages from '@/hooks/portage/useGetPortages';
 import useGetOffices from '@/hooks/office/useGetOffices';
 import useBulkUpdateConsultants from '@/hooks/consultant/useBulkUpdateConsultants';
 import { BulkUpdateConsultantsPayload } from '@/types/consultant/BulkUpdateConsultantsPayload';
+import { ConsultantRole } from '@/types/consultant/ConsultantRole';
+import { ConsultantType } from '@/types/consultant/ConsultantType';
 import { toast } from 'sonner';
 
 interface BulkEditConsultantsDialogProps {
@@ -33,6 +35,9 @@ const BulkEditConsultantsDialog = ({
 }: BulkEditConsultantsDialogProps) => {
   const [portageId, setPortageId] = useState<string>('');
   const [officeId, setOfficeId] = useState<string>('');
+  const [status, setStatus] = useState<string>('');
+  const [type, setType] = useState<string>('');
+  const [role, setRole] = useState<string>('');
   const [showError, setShowError] = useState<boolean>(false);
 
   const { isPending: isPortagesPending, data: portagesData } = useGetPortages();
@@ -51,11 +56,16 @@ const BulkEditConsultantsDialog = ({
       value: office.id,
     })) || [];
 
-  const hasSelection = Boolean(portageId || officeId);
+  const hasSelection = Boolean(
+    portageId || officeId || status || type || role
+  );
 
   const resetState = () => {
     setPortageId('');
     setOfficeId('');
+    setStatus('');
+    setType('');
+    setRole('');
     setShowError(false);
   };
 
@@ -74,6 +84,9 @@ const BulkEditConsultantsDialog = ({
       ids: selectedIds,
       ...(portageId ? { portageId } : {}),
       ...(officeId ? { officeId } : {}),
+      ...(status ? { status } : {}),
+      ...(type ? { type } : {}),
+      ...(role ? { role } : {}),
     };
 
     try {
@@ -116,8 +129,9 @@ const BulkEditConsultantsDialog = ({
           <DialogHeader>
             <DialogTitle>Modifier la sélection</DialogTitle>
             <DialogDescription>
-              Réaffectez la société de portage et/ou le LLP des consultants
-              sélectionnés. Seuls les champs renseignés seront modifiés.
+              Réaffectez la société de portage, le LLP, le statut, le type ou le
+              rôle des consultants sélectionnés. Seuls les champs renseignés
+              seront modifiés.
             </DialogDescription>
           </DialogHeader>
 
@@ -160,8 +174,68 @@ const BulkEditConsultantsDialog = ({
               )}
             </div>
 
+            {/* Status Select */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="status">Statut</Label>
+              <CustomSelect
+                value={status}
+                onChange={(value) => {
+                  setStatus(value);
+                  setShowError(false);
+                }}
+                placeholder="Sélectionnez un statut"
+                options={[
+                  { label: 'Actif', value: 'active' },
+                  { label: 'Inactif', value: 'inactive' },
+                ]}
+                className="w-full"
+              />
+            </div>
+
+            {/* Type Select */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="type">Type</Label>
+              <CustomSelect
+                value={type}
+                onChange={(value) => {
+                  setType(value);
+                  setShowError(false);
+                }}
+                placeholder="Sélectionnez un type"
+                options={[
+                  { label: 'UK', value: ConsultantType.UK },
+                  { label: 'FR', value: ConsultantType.FR },
+                  {
+                    label: 'Entrepreneur',
+                    value: ConsultantType.ENTREPRENEUR,
+                  },
+                ]}
+                className="w-full"
+              />
+            </div>
+
+            {/* Role Select */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="role">Rôle</Label>
+              <CustomSelect
+                value={role}
+                onChange={(value) => {
+                  setRole(value);
+                  setShowError(false);
+                }}
+                placeholder="Sélectionnez un rôle"
+                options={[
+                  { label: 'Ambassadeur', value: ConsultantRole.AMBASSADOR },
+                  { label: 'Influenceur', value: ConsultantRole.INFLUENCER },
+                  { label: 'Élite', value: ConsultantRole.ELITE },
+                  { label: 'Aucun', value: ConsultantRole.NONE },
+                ]}
+                className="w-full"
+              />
+            </div>
+
             {showError && !hasSelection && (
-              <CustomErrorIndicator message="Sélectionnez au moins une société de portage ou un LLP." />
+              <CustomErrorIndicator message="Sélectionnez au moins une société de portage, un LLP, un statut, un type ou un rôle." />
             )}
 
             <p className="text-sm text-[#525866] font-medium">
