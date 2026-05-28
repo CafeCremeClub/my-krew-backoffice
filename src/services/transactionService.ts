@@ -70,12 +70,10 @@ export const updateTransaction = async (
   payload: UpdateTransactionPayload
 ): Promise<Transaction> => {
   try {
+    const { id, ...data } = payload;
     const response = await axiosInstance.patch<Transaction>(
-      `/transactions/${payload.id}`,
-      {
-        status: payload.status,
-        comment: payload.comment,
-      }
+      `/transactions/${id}`,
+      data
     );
     return response.data;
   } catch (error) {
