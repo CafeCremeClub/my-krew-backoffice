@@ -72,7 +72,7 @@ Page / Composant (client)
 - **State serveur** : TanStack React Query (cache, mutations, devtools).
 - **UI** : Tailwind CSS 4 + shadcn/ui (style « new-york ») + primitives Radix.
 
-**Stack** : Next.js 15.5 · React 19 · TypeScript 5 · React Query 5 · axios · Formik + Yup ·
+**Stack** : Next.js 15.5.18 · React 19 · TypeScript 5 · React Query 5 · axios · Formik + Yup ·
 Tailwind 4 · shadcn/ui · sonner · papaparse.
 
 ---
@@ -133,11 +133,15 @@ src/
 | Module | Route | Fonctionnalités |
 |---|---|---|
 | **Auth** | `/auth/signin` | Connexion email + OTP, contrôle du rôle `ADMIN` |
-| **Consultants** | `/dashboard`, `/dashboard/consultants/[id]` | Liste paginée + recherche, création, édition, suppression, changement de rôle, import CSV |
-| **Transactions** | `/dashboard/transactions` | Liste, création, édition, import CSV |
-| **Portage** | `/dashboard/portage` | Liste & création de sociétés de portage |
-| **LLP** | `/dashboard/office` | Liste & création de LLP (ex-« Bureaux ») |
-| **Cooptation** | `/dashboard/referrals` | Liste & création de cooptations (referrals) |
+| **Consultants** | `/dashboard`, `/dashboard/consultants/[id]` | Liste paginée avec recherche temps réel (debounced 400 ms), filtres (Statut / Portage / LLP), tri (Nom, Date de début), sélecteur de taille de page (10/25/50/100), création, édition (formulaire unifié : identité, LLP, portage, statut, type, dates, rôle, estimation, taux de rendement), suppression (soft delete), changement de rôle, **édition en lot** (Portage / LLP / Statut / Type / Rôle), import CSV |
+| **Transactions** | `/dashboard/transactions` | Liste, création, édition (Type, Statut, Montant, Date, Commentaires), suppression (soft delete), import CSV. Badge « Archivé » si consultant supprimé |
+| **Portage** | `/dashboard/portage` | Liste, création, renommage et suppression (soft delete) des sociétés de portage |
+| **LLP** | `/dashboard/office` | Liste, création, renommage et suppression (soft delete) des LLP (ex-« Bureaux ») |
+| **Cooptation** | `/dashboard/referrals` | Liste, création, édition (Statut, Montant, Date début, Date fin), suppression (soft delete). Badge « Archivé » si consultant supprimé |
+
+> Toutes les suppressions passent par une confirmation Radix `AlertDialog` et s'appuient sur
+> le **soft delete** côté API (`deletedAt`). L'identité des consultants supprimés reste
+> lisible dans l'historique (transactions, cooptations) ; seul l'email est neutralisé.
 
 ---
 

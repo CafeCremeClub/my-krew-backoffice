@@ -17,11 +17,22 @@ financières, les sociétés de portage, les LLP (anciennement « Bureaux ») et
   avec le rôle `USER` sont explicitement bloqués à la connexion.
 - **Cas d'usage principaux** :
   - Authentification par email + code OTP (one-time password).
-  - Gestion des consultants : liste paginée, recherche, création, édition, suppression,
-    changement de rôle, import CSV en lot.
-  - Gestion des transactions : liste, création, édition, import CSV en lot.
-  - Gestion des sociétés de portage et des LLP.
-  - Gestion des cooptations (referrals).
+  - Gestion des consultants : liste paginée avec **recherche en temps réel par nom** (debounced
+    400 ms, server-side), **filtres** (Statut, Société de portage, LLP), **tri** sur Nom et
+    Date de début, **sélecteur de taille de page** (10 / 25 / 50 / 100), création, édition,
+    suppression (via Radix `AlertDialog`), changement de rôle, **édition en lot** (Société
+    de portage, LLP, Statut, Type, Rôle), import CSV en lot.
+  - Formulaire consultant unifié : la création et l'édition partagent les mêmes champs
+    (identité, LLP, portage, statut, type, dates, rôle, estimation mensuelle, taux de
+    rendement). La création applique le rôle juste après via l'endpoint existant.
+  - Gestion des transactions : liste, création, édition (Type, Statut, Montant, Date,
+    Commentaires), suppression (soft delete), import CSV en lot.
+  - Gestion des sociétés de portage et des LLP : liste, création, **renommage** et
+    **suppression** (soft delete) avec confirmation Radix `AlertDialog`.
+  - Gestion des cooptations (referrals) : liste, création, édition (Statut, Montant,
+    Date début, Date fin), suppression (soft delete).
+  - **Badge « Archivé »** affiché côté transactions / cooptations quand le consultant lié a
+    été soft-deleted ; l'identité reste lisible (seul l'email est grisé).
 
 > ⚠️ **Périmètre** : ce repository est **frontend-only**. Il n'embarque ni backend ni base de
 > données. Toute la logique métier et la persistance sont assurées par une API REST externe
@@ -33,7 +44,7 @@ financières, les sociétés de portage, les LLP (anciennement « Bureaux ») et
 
 | Domaine | Technologie | Version |
 |---|---|---|
-| Framework | Next.js (App Router) | 15.5.2 |
+| Framework | Next.js (App Router) | 15.5.18 |
 | Runtime React | React / React DOM | 19.1.0 |
 | Langage | TypeScript | ^5 |
 | Build / dev | Turbopack (`next dev/build --turbopack`) | — |
@@ -243,27 +254,49 @@ npm run dev
 - `POST /users/otp` — envoi du code OTP par email
 - `POST /users` — connexion (vérifie l'OTP, renvoie `{ user, accessToken }`)
 - `GET /users/me` — profil de l'utilisateur courant
-- `PATCH /users/update` — mise à jour des infos utilisateur
+- `PATCH /users/update` — mise à jour des infos de l'utilisateur courant
+- `PATCH /users/admin/:id` — mise à jour de l'identité d'un autre utilisateur (firstname,
+  lastname, email, phone) — réservé ADMIN
 - `POST /users/register` — création d'un consultant
 - `POST /users/register/batch` — création en lot (CSV)
-- `DELETE /users/:id` — suppression d'un consultant
+- `DELETE /users/:id` — suppression (soft delete) d'un consultant
 
 **Consultants**
-- `GET /consultants/admin` — liste paginée (params : `page`, `perPage`, `search`)
+- `GET /consultants/admin` — liste paginée. Params : `page`, `perPage`, `search` (nom/email),
+  `status`, `portageId`, `officeId`, `sortBy` (`name` | `startDate`), `sortOrder`
+  (`asc` | `desc`)
 - `GET /consultants/admin/:id` — détail
 - `PATCH /consultants/role/:id` — changement de rôle
-- `PATCH /consultants/update/:id` — édition
+- `PATCH /consultants/update/:id` — édition (LLP, portage, statut, type, dates, estimation,
+  taux de rendement…)
+- `PATCH /consultants/batch` — édition en lot (`ids` + champs : `officeId`, `portageId`,
+  `status`, `type`, `role`). Pré-validation côté API en « tout ou rien ».
 
 **Transactions**
-- `GET /transactions/admin` — liste (params query)
+- `GET /transactions/admin` — liste paginée. Params : `page`, `perPage`, `search`
+  (ILIKE sur firstname/lastname/email du consultant lié à la transaction)
 - `POST /transactions/:consultantId` — création
 - `POST /transactions/batch` — création en lot (CSV)
-- `PATCH /transactions/:id` — édition (status, comment)
+- `PATCH /transactions/:id` — édition (`type`, `status`, `amount`, `date`, `comment`)
+- `DELETE /transactions/:id` — suppression (soft delete)
 
-**Offices (LLP) / Portages / Referrals**
-- `GET /offices/all`, `POST /offices`
-- `GET /portages/all`, `POST /portages`
-- `GET /referrals/admin` (params query), `POST /referrals`
+**Offices (LLP)**
+- `GET /offices/all` — liste
+- `POST /offices` — création
+- `PATCH /offices/:id` — renommage
+- `DELETE /offices/:id` — suppression (soft delete)
+
+**Portages**
+- `GET /portages/all` — liste
+- `POST /portages` — création
+- `PATCH /portages/:id` — renommage
+- `DELETE /portages/:id` — suppression (soft delete)
+
+**Referrals (cooptations)**
+- `GET /referrals/admin` — liste paginée (params query)
+- `POST /referrals` — création
+- `PATCH /referrals/:id` — édition (`status`, `amount`, `startDate`, `endDate`)
+- `DELETE /referrals/:id` — suppression (soft delete)
 
 > ⚠️ Le contrat exact (schémas de requête/réponse) est défini côté API externe. Les types dans
 > `src/types/**` reflètent l'usage observé côté front et peuvent ne pas couvrir tous les champs API.
@@ -306,6 +339,15 @@ npm run dev
   invalider les bonnes `queryKey`).
 - **Import CSV** : géré côté client avec `papaparse` puis envoyé en lot (`/batch`). Vérifier le
   mapping de colonnes attendu par l'API.
+- **Actions par ligne (Modifier / Supprimer)** : présentes désormais sur **les quatre
+  domaines** (consultants, transactions, portage, LLP, referrals), pas seulement les
+  consultants. La suppression passe systématiquement par une confirmation Radix
+  `AlertDialog` et s'appuie sur le **soft delete** côté API (`deletedAt`).
+- **Édition en lot des consultants** : permet de réassigner Société de portage / LLP et
+  de changer Statut / Type / Rôle pour plusieurs consultants en une action. Le toast de
+  résultat affiche `requested / updated / failed` (cf. `BulkUpdateConsultantsResult`).
+- **Recherche debounced** : 400 ms côté consultants **et** côté transactions admin
+  (server-side dans les deux cas — couvre toutes les pages, pas seulement la page courante).
 
 ---
 
