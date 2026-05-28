@@ -18,12 +18,16 @@ import TransactionsTablePaginationControls from '@/components/dashboard/transact
 import TransactionsTableSkeleton from '@/components/dashboard/transaction/TransactionsTableSkeleton';
 import { Transaction } from '@/types/transaction/Transaction';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash } from 'lucide-react';
+import { Pencil, Search, Trash } from 'lucide-react';
 import EditTransactionDialog from '@/components/dashboard/transaction/EditTransactionDialog';
 import DeleteTransactionAlertDialog from '@/components/dashboard/transaction/DeleteTransactionAlertDialog';
+import CustomInput from '@/components/custom/CustomInput';
+import useDebouncedValue from '@/hooks/useDebouncedValue';
 
 const TransactionsTable = () => {
   const [page, setPage] = useState<number>(1);
+  const [search, setSearch] = useState<string>('');
+  const debouncedSearch = useDebouncedValue(search, 400);
   const [transactionToEdit, setTransactionToEdit] =
     useState<Transaction | null>(null);
   const [transactionToDelete, setTransactionToDelete] =
@@ -35,10 +39,16 @@ const TransactionsTable = () => {
     data: transactions,
   } = useGetTransactions({
     page,
+    search: debouncedSearch || undefined,
   });
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
   };
 
   const getTransactionTypeBadge = (type: TransactionType) => {
@@ -157,6 +167,18 @@ const TransactionsTable = () => {
           transaction={transactionToDelete}
         />
       )}
+
+      <div className="flex flex-wrap items-center gap-3 pb-4">
+        <div className="w-full sm:w-72">
+          <CustomInput
+            type="text"
+            placeholder="Rechercher par nom ou email"
+            value={search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            leftIcon={<Search className="text-[#868C98]" size={16} />}
+          />
+        </div>
+      </div>
 
       <div className="h-full overflow-y-auto">
         {isPending ? (
@@ -297,6 +319,15 @@ const TransactionsTable = () => {
               onPageChange={handlePageChange}
             />
           </>
+        ) : debouncedSearch ? (
+          <div className="h-full flex flex-col justify-center items-center gap-0.5">
+            <p className="font-semibold text-center text-2xl text-[#101828]">
+              Aucun résultat
+            </p>
+            <p className="text-center text-sm text-[#525866] font-medium">
+              Aucune transaction ne correspond à votre recherche.
+            </p>
+          </div>
         ) : (
           <div className="h-full flex flex-col justify-center items-center gap-0.5">
             <p className="font-semibold text-center text-2xl text-[#101828]">

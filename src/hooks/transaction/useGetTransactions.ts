@@ -9,14 +9,22 @@ const useGetTransactions = (params?: GetTransactionsParams) => {
   const mergeParams: GetTransactionsParams = {
     page: params?.page ?? DEFAULT_PAGE,
     perPage: params?.perPage ?? GET_TRANSACTIONS_DEFAULT_PER_PAGE,
+    search: params?.search || undefined,
   };
 
   return useQuery({
-    queryKey: ['get-transactions', mergeParams.page, mergeParams.perPage],
+    queryKey: [
+      'get-transactions',
+      mergeParams.page,
+      mergeParams.perPage,
+      mergeParams.search,
+    ],
     queryFn: async () => await getTransactions(mergeParams),
     retry: 0,
-    refetchOnMount: false,
+    refetchOnMount: 'always',
     refetchInterval: false,
+    staleTime: mergeParams.search ? 0 : 5 * 60 * 1000,
+    gcTime: mergeParams.search ? 0 : 5 * 60 * 1000,
   });
 };
 
