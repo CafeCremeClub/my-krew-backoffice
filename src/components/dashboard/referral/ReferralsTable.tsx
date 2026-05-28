@@ -11,12 +11,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Pen, Trash } from 'lucide-react';
 import { formatDateToFR } from '@/utils/helpers/formatDateToFR';
 import ReferralsTablePaginationControls from '@/components/dashboard/referral/ReferralsTablePaginationControls';
+import EditReferralDialog from '@/components/dashboard/referral/EditReferralDialog';
+import DeleteReferralAlertDialog from '@/components/dashboard/referral/DeleteReferralAlertDialog';
 import { Referral } from '@/types/referral/Referral';
 
 const ReferralsTable = () => {
   const [page, setPage] = useState<number>(1);
+  const [referralToEdit, setReferralToEdit] = useState<Referral | null>(null);
+  const [referralToDelete, setReferralToDelete] = useState<Referral | null>(
+    null
+  );
 
   const {
     isPending,
@@ -83,16 +91,36 @@ const ReferralsTable = () => {
     }).format(numericAmount);
   };
 
-  const isDeletedReferre = (referral: Referral) => {
-    return referral.referee.email.includes('deleted-');
-  };
+  const isArchivedEmail = (email: string) => email.startsWith('deleted-');
 
-  const isDeletedReferrer = (referral: Referral) => {
-    return referral.referrer.email.includes('deleted-');
-  };
+  const archivedBadge = (
+    <span className="inline-flex items-center bg-gray-100 text-gray-600 text-xs rounded px-1.5 py-0.5 ml-2">
+      Archivé
+    </span>
+  );
+
+  const deletedEmailCell = (
+    <span className="text-[#98A2B3] italic">Supprimé</span>
+  );
 
   return (
     <>
+      {referralToEdit && (
+        <EditReferralDialog
+          isOpen={!!referralToEdit}
+          onClose={() => setReferralToEdit(null)}
+          referral={referralToEdit}
+        />
+      )}
+
+      {referralToDelete && (
+        <DeleteReferralAlertDialog
+          open={!!referralToDelete}
+          onClose={() => setReferralToDelete(null)}
+          referral={referralToDelete}
+        />
+      )}
+
       <div className="h-full overflow-y-auto">
         {isPending ? (
           <ReferralsTableSkeleton />
@@ -139,107 +167,54 @@ const ReferralsTable = () => {
                     <TableHead className="text-[#475467] text-xs min-w-32">
                       Date création
                     </TableHead>
+                    <TableHead className="text-[#475467] text-xs min-w-24">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {referrals.data.map((referral) => {
-                    const deletedReferre = isDeletedReferre(referral);
-                    const deletedReferrer = isDeletedReferrer(referral);
+                    const deletedReferre = isArchivedEmail(
+                      referral.referee.email
+                    );
+                    const deletedReferrer = isArchivedEmail(
+                      referral.referrer.email
+                    );
                     return (
                       <TableRow
                         key={referral.id}
-                        className={`cursor-pointer hover:bg-gray-50 h-16 ${
-                          deletedReferre || deletedReferrer
-                            ? 'bg-red-50 border-l-4 border-red-400'
-                            : ''
-                        }`}
+                        className="hover:bg-gray-50 h-16"
                       >
-                        <TableCell
-                          className={`text-sm font-medium ${
-                            deletedReferrer ? 'text-red-600' : 'text-[#101828]'
-                          }`}
-                        >
-                          {deletedReferrer ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                              Supprimé
-                            </span>
-                          ) : (
-                            `${referral.referrer.firstname} ${referral.referrer.lastname}`
-                          )}
+                        <TableCell className="text-sm text-[#101828] font-medium">
+                          <span className="inline-flex items-center">
+                            {`${referral.referrer.firstname} ${referral.referrer.lastname}`}
+                            {deletedReferrer ? archivedBadge : null}
+                          </span>
                         </TableCell>
-                        <TableCell
-                          className={`text-sm ${
-                            deletedReferrer ? 'text-red-600' : 'text-[#475467]'
-                          }`}
-                        >
-                          {deletedReferrer ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                              Supprimé
-                            </span>
-                          ) : (
-                            referral.referrer.email
-                          )}
+                        <TableCell className="text-sm text-[#475467]">
+                          {deletedReferrer
+                            ? deletedEmailCell
+                            : referral.referrer.email}
                         </TableCell>
-                        <TableCell
-                          className={`text-sm ${
-                            deletedReferrer ? 'text-red-600' : 'text-[#475467]'
-                          }`}
-                        >
-                          {deletedReferrer ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                              Supprimé
-                            </span>
-                          ) : (
-                            referral.referrer.phone
-                          )}
+                        <TableCell className="text-sm text-[#475467]">
+                          {referral.referrer.phone}
                         </TableCell>
-                        <TableCell
-                          className={`text-sm font-medium ${
-                            deletedReferre ? 'text-red-600' : 'text-[#101828]'
-                          }`}
-                        >
-                          {deletedReferre ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                              Supprimé
-                            </span>
-                          ) : (
-                            `${referral.referee.firstname} ${referral.referee.lastname}`
-                          )}
+                        <TableCell className="text-sm text-[#101828] font-medium">
+                          <span className="inline-flex items-center">
+                            {`${referral.referee.firstname} ${referral.referee.lastname}`}
+                            {deletedReferre ? archivedBadge : null}
+                          </span>
                         </TableCell>
-                        <TableCell
-                          className={`text-sm ${
-                            deletedReferre ? 'text-red-600' : 'text-[#475467]'
-                          }`}
-                        >
-                          {deletedReferre ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                              Supprimé
-                            </span>
-                          ) : (
-                            referral.referee.email
-                          )}
+                        <TableCell className="text-sm text-[#475467]">
+                          {deletedReferre
+                            ? deletedEmailCell
+                            : referral.referee.email}
                         </TableCell>
-                        <TableCell
-                          className={`text-sm ${
-                            deletedReferre ? 'text-red-600' : 'text-[#475467]'
-                          }`}
-                        >
-                          {deletedReferre ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                              Supprimé
-                            </span>
-                          ) : (
-                            referral.referee.phone
-                          )}
+                        <TableCell className="text-sm text-[#475467]">
+                          {referral.referee.phone}
                         </TableCell>
                         <TableCell className="text-sm">
-                          {deletedReferre ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                              Supprimé
-                            </span>
-                          ) : (
-                            getStatusBadge(referral.status)
-                          )}
+                          {getStatusBadge(referral.status)}
                         </TableCell>
                         <TableCell className="text-sm text-[#475467]">
                           {formatCurrency(referral.amount)}
@@ -252,6 +227,36 @@ const ReferralsTable = () => {
                         </TableCell>
                         <TableCell className="text-sm text-[#475467]">
                           {formatDateToFR(referral.creationDate)}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Modifier le parrainage"
+                              title="Modifier"
+                              className="h-8 w-8 hover:bg-gray-100 cursor-pointer text-[#475467]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setReferralToEdit(referral);
+                              }}
+                            >
+                              <Pen className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Supprimer le parrainage"
+                              title="Supprimer"
+                              className="h-8 w-8 hover:bg-red-50 cursor-pointer text-red-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setReferralToDelete(referral);
+                              }}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

@@ -2,6 +2,7 @@ import { GetReferralsResponse } from '@/types/referral/GetReferralsResponse';
 import { GetReferralsParams } from '@/types/referral/GetReferralsParams';
 import axiosInstance from '@/config/axiosInstance';
 import { CreateReferralPayload } from '@/types/referral/CreateReferralPayload';
+import { UpdateReferralPayload } from '@/types/referral/UpdateReferralPayload';
 import { Referral } from '@/types/referral/Referral';
 
 export const getReferrals = async (
@@ -36,6 +37,29 @@ export const createReferral = async (
   try {
     const response = await axiosInstance.post<Referral>('/referrals', payload);
     return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateReferral = async (
+  payload: UpdateReferralPayload
+): Promise<Referral> => {
+  try {
+    const { id, ...data } = payload;
+    const response = await axiosInstance.patch<Referral>(
+      `/referrals/${id}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteReferral = async (id: string): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/referrals/${id}`);
   } catch (error) {
     throw error;
   }

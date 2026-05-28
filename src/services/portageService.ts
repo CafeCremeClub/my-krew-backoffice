@@ -37,3 +37,11 @@ export const updatePortage = async (
     throw error;
   }
 };
+
+export const deletePortage = async (id: string): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/portages/${id}`);
+  } catch (error) {
+    throw error;
+  }
+};
