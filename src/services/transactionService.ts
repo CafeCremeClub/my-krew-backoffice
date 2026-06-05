@@ -32,6 +32,41 @@ export const getTransactions = async (
   }
 };
 
+const EXPORT_PER_PAGE: number = 100;
+
+/**
+ * Récupère l'intégralité des transactions (toutes les pages) en suivant la
+ * pagination de l'API. Respecte la recherche active si `search` est fourni.
+ * Utilisé par l'export CSV pour couvrir tout le jeu de données, pas seulement
+ * la page courante.
+ */
+export const getAllTransactions = async (
+  search?: string
+): Promise<Transaction[]> => {
+  try {
+    const all: Transaction[] = [];
+    let page = 1;
+
+    while (true) {
+      const response = await getTransactions({
+        page,
+        perPage: EXPORT_PER_PAGE,
+        search,
+      });
+
+      all.push(...response.data);
+
+      const totalPages = Math.ceil(response.count / response.perPage);
+      if (page >= totalPages || response.data.length === 0) break;
+      page += 1;
+    }
+
+    return all;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const createTransaction = async (
   payload: CreateTransactionPayload
 ): Promise<Transaction> => {
