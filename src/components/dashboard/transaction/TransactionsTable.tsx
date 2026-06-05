@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useGetTransactions from '@/hooks/transaction/useGetTransactions';
 import {
   Table,
@@ -24,14 +24,28 @@ import DeleteTransactionAlertDialog from '@/components/dashboard/transaction/Del
 import CustomInput from '@/components/custom/CustomInput';
 import useDebouncedValue from '@/hooks/useDebouncedValue';
 
-const TransactionsTable = () => {
+interface TransactionsTableProps {
+  search: string;
+  onSearchChange: (value: string) => void;
+  onSelectionChange?: (selected: Transaction[]) => void;
+}
+
+const TransactionsTable = ({
+  search,
+  onSearchChange,
+  onSelectionChange,
+}: TransactionsTableProps) => {
   const [page, setPage] = useState<number>(1);
-  const [search, setSearch] = useState<string>('');
   const debouncedSearch = useDebouncedValue(search, 400);
   const [transactionToEdit, setTransactionToEdit] =
     useState<Transaction | null>(null);
   const [transactionToDelete, setTransactionToDelete] =
     useState<Transaction | null>(null);
+
+  // Keep the full Transaction objects keyed by id so the selection survives
+  // page changes (the export needs the data, not just the ids).
+  const [selected, setSelected] = useState<Map<string, Transaction>>(new Map());
+  const selectAllRef = useRef<HTMLInputElement>(null);
 
   const {
     isPending,
@@ -42,12 +56,60 @@ const TransactionsTable = () => {
     search: debouncedSearch || undefined,
   });
 
+  const currentRows = useMemo(() => transactions?.data ?? [], [transactions]);
+
+  // Reset selection whenever the search query changes (different data set).
+  useEffect(() => {
+    setSelected(new Map());
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    onSelectionChange?.(Array.from(selected.values()));
+  }, [selected, onSelectionChange]);
+
+  const allCurrentSelected =
+    currentRows.length > 0 && currentRows.every((row) => selected.has(row.id));
+  const someCurrentSelected =
+    currentRows.some((row) => selected.has(row.id)) && !allCurrentSelected;
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someCurrentSelected;
+    }
+  }, [someCurrentSelected, currentRows.length, selected]);
+
+  const toggleSelectOne = (transaction: Transaction) => {
+    setSelected((prev) => {
+      const next = new Map(prev);
+      if (next.has(transaction.id)) {
+        next.delete(transaction.id);
+      } else {
+        next.set(transaction.id, transaction);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelected((prev) => {
+      const next = new Map(prev);
+      if (allCurrentSelected) {
+        currentRows.forEach((row) => next.delete(row.id));
+      } else {
+        currentRows.forEach((row) => next.set(row.id, row));
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelected(new Map());
+
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
   const handleSearchChange = (value: string) => {
-    setSearch(value);
+    onSearchChange(value);
     setPage(1);
   };
 
@@ -189,10 +251,34 @@ const TransactionsTable = () => {
           </div>
         ) : transactions && transactions.data.length > 0 ? (
           <>
+            {selected.size > 0 && (
+              <div className="flex items-center justify-between gap-4 mb-3 px-4 py-3 rounded-[0.625rem] border border-[#E2E4E9] bg-[#F6F8FA]">
+                <p className="text-sm font-medium text-[#101828]">
+                  {selected.size} sélectionné(s)
+                </p>
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="text-sm font-medium text-[#475467] hover:text-[#101828] cursor-pointer"
+                >
+                  Désélectionner
+                </button>
+              </div>
+            )}
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader className="h-16">
                   <TableRow>
+                    <TableHead className="text-[#475467] text-xs w-12">
+                      <input
+                        ref={selectAllRef}
+                        type="checkbox"
+                        aria-label="Tout sélectionner sur cette page"
+                        className="size-4 cursor-pointer accent-[#375DFB]"
+                        checked={allCurrentSelected}
+                        onChange={toggleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead className="text-[#475467] text-xs min-w-40">
                       Consultant
                     </TableHead>
@@ -233,6 +319,16 @@ const TransactionsTable = () => {
                         key={transaction.id}
                         className="hover:bg-gray-50 h-16"
                       >
+                        <TableCell className="text-sm">
+                          <input
+                            type="checkbox"
+                            aria-label={`Sélectionner la transaction de ${transaction.firstname} ${transaction.lastname}`}
+                            className="size-4 cursor-pointer accent-[#375DFB]"
+                            checked={selected.has(transaction.id)}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={() => toggleSelectOne(transaction)}
+                          />
+                        </TableCell>
                         <TableCell className="text-sm font-medium text-[#101828]">
                           <span className="inline-flex items-center">
                             {`${transaction.firstname} ${transaction.lastname}`}
