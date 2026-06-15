@@ -4,6 +4,7 @@ import { CreateTransactionPayload } from '@/types/transaction/CreateTransactionP
 import { Transaction } from '@/types/transaction/Transaction';
 import axiosInstance from '@/config/axiosInstance';
 import { CreateCSVTransactionsPayload } from '@/types/transaction/CreateCSVTransactionsPayload';
+import { CreateCSVTransactionsResponse } from '@/types/transaction/CreateCSVTransactionsResponse';
 import { UpdateTransactionPayload } from '@/types/transaction/UpdateTransactionPayload';
 
 export const getTransactions = async (
@@ -89,9 +90,9 @@ export const createTransaction = async (
 
 export const createCSVTransactions = async (
   payload: CreateCSVTransactionsPayload
-): Promise<Transaction[]> => {
+): Promise<CreateCSVTransactionsResponse> => {
   try {
-    const response = await axiosInstance.post<Transaction[]>(
+    const response = await axiosInstance.post<CreateCSVTransactionsResponse>(
       '/transactions/batch',
       payload
     );

@@ -190,7 +190,7 @@ const ImportTransactionsCSVDialog = ({
     };
 
     try {
-      await createCSVTransactions(payload);
+      const result = await createCSVTransactions(payload);
 
       await queryClient.invalidateQueries({
         queryKey: [
@@ -202,14 +202,51 @@ const ImportTransactionsCSVDialog = ({
         exact: true,
       });
 
-      toast.success(
-        `${csvData.length} transaction(s) importée(s) avec succès`,
-        {
-          position: 'bottom-right',
-          className: '!bg-[#CBF5E5] !text-[#176448] !border !border-[#CBF5E5]',
-          descriptionClassName: '!text-[#176448] !text-sm',
-        }
+      // L'API renvoie le détail réel : on n'affiche plus csvData.length (qui
+      // surévaluerait le succès quand des lignes sont ignorées comme doublons).
+      const skippedNotFound = result.skipped.filter(
+        (s) => s.reason === 'USER_NOT_FOUND'
       );
+      const skippedDuplicate = result.skipped.filter(
+        (s) => s.reason === 'DUPLICATE'
+      );
+
+      const descriptionParts: string[] = [];
+      if (skippedDuplicate.length > 0) {
+        descriptionParts.push(
+          `${skippedDuplicate.length} doublon(s) ignoré(s)`
+        );
+      }
+      if (skippedNotFound.length > 0) {
+        descriptionParts.push(
+          `${skippedNotFound.length} ligne(s) sans consultant correspondant : ${skippedNotFound
+            .map((s) => s.email)
+            .join(', ')}`
+        );
+      }
+
+      if (result.skippedCount > 0) {
+        // Import partiel : succès nuancé en warning pour ne pas masquer les
+        // lignes non importées (doublons / emails introuvables).
+        toast.warning(
+          `${result.createdCount} transaction(s) importée(s), ${result.skippedCount} ignorée(s)`,
+          {
+            description: descriptionParts.join(' · '),
+            position: 'bottom-right',
+            duration: 8000,
+          }
+        );
+      } else {
+        toast.success(
+          `${result.createdCount} transaction(s) importée(s) avec succès`,
+          {
+            position: 'bottom-right',
+            className:
+              '!bg-[#CBF5E5] !text-[#176448] !border !border-[#CBF5E5]',
+            descriptionClassName: '!text-[#176448] !text-sm',
+          }
+        );
+      }
 
       handleClose();
     } catch (error) {
